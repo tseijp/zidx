@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
-import { zIndex } from '../index'
+import { zIndex } from './index'
 
 describe('zidx pair basics 0.0', () => {
         it('orders linear string chains with constant stride', () => {

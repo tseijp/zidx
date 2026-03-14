@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
-import { zIndex } from '../index'
+import { zIndex } from './index'
 
 describe('zidx pair recursion 0.1', () => {
         it('links a parent to the root of a nested TaggedPairs chain', () => {

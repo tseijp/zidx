@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { zIndex } from '../index'
+import { zIndex } from './index'
 
 const mid = (lo: number, up: number) => lo + ((up - lo) >> 1)
 

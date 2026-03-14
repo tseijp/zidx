@@ -1,5 +1,5 @@
-import { describe, expect, expectTypeOf, it } from 'vitest'
-import { zIndex } from '../index'
+import { describe, expect, it } from 'vitest'
+import { zIndex } from './index'
 
 describe('zidx pair inference 0.2', () => {
         it('recurses through nested tagged subtrees and preserves uniform steps', () => {

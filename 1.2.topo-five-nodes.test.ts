@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { zIndex } from '../index'
+import { zIndex } from './index'
 
-const orderKeys = <K extends string>(ranks: Record<K, number>, keys: readonly K[]) =>
-        [...keys].sort((a, b) => ranks[a] - ranks[b])
+const orderKeys = <K extends string>(ranks: Record<K, number>, keys: readonly K[]) => [...keys].sort((a, b) => ranks[a] - ranks[b])
 
 const uniformGap = <K extends string>(ranks: Record<K, number>, keys: readonly K[]) => {
         const seq = orderKeys(ranks, keys)
