@@ -12,9 +12,9 @@ npm i z-idx
 
 <!-- prettier-ignore -->
 ```ts
-import z-idx from 'z-idx'
+import index from 'z-idx'
 
-const base = z-idx((z) => z('root', ['left', z('mid', ['bridge']), 'right']))
+const base = index((z) => z('root', ['left', z('mid', ['bridge']), 'right']))
 
 const next = base((z) => [
   z('left', 'l1', 'mid'),
