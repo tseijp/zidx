@@ -99,6 +99,7 @@ const resolveNode = (nodes: Node[], path: string[]) => {
         return current
 }
 const pickChildren = (nodes: Node[], path: string[], depth: number) => resolveNode(nodes, path.slice(0, depth + 1))?.children || []
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
 const frame = { position: 'relative', width: '100%', minHeight: '360px', padding: '24px', borderRadius: '16px', background: 'linear-gradient(120deg,#f7f8fb,#eef2f7)', boxShadow: '0 16px 48px rgba(15,23,42,0.12)', color: '#0f172a', overflow: 'hidden', fontFamily: '"SF Pro Display","Helvetica Neue",sans-serif' }
 const bar = { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'rgba(255,255,255,0.86)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 12px 32px rgba(15,23,42,0.14)' }
@@ -122,7 +123,12 @@ const MenuPlayground = ({ ranks, labels }: { ranks: Layers; labels?: Legend }) =
         const close = (depth: number) => setPath((prev) => prev.slice(0, depth))
         const drill = (depth: number, node: Node) => {
                 if (node.action) node.action()
-                if (node.href) window.open(node.href, '_blank', 'noreferrer')
+                if (node.href) {
+                        if (node.href.startsWith('#')) {
+                                const target = document.querySelector(node.href)
+                                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        } else window.open(node.href, '_blank', 'noreferrer')
+                }
                 if (node.children?.length)
                         setPath((prev) => {
                                 const next = prev.slice(0, depth + 1)
@@ -238,6 +244,10 @@ const App = () => {
         const renderDoc = (doc: string) => {
                 if (!ref.current) return
                 ref.current.innerHTML = doc
+                const heads = Array.from(ref.current.querySelectorAll('h1,h2,h3,h4'))
+                heads.forEach((h) => {
+                        if (!h.id) h.id = slug(h.textContent || '')
+                })
                 setBlocks(Array.from(ref.current.querySelectorAll('.code-block')) as HTMLElement[])
                 setCharts(Array.from(ref.current.querySelectorAll('.mermaid-block')) as HTMLElement[])
         }
