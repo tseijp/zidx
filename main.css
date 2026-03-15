@@ -8,6 +8,7 @@ main {
 }
 
 table {
-        max-width: 1000px;
-        overflow-x: scroll;
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
 }
