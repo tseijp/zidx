@@ -9,38 +9,14 @@ import { createRoot } from 'react-dom/client'
 import { LiveEditor, LiveError, LivePreview, LiveProvider } from 'react-live'
 import { themes } from 'prism-react-renderer'
 import './main.css'
-
-type CodeBlockProps = { code: string; language: string; inline?: string }
 type NodeProps = { id: string; label: string; href?: string; note?: string; action?: () => void; children?: React.ReactNode }
 type NodeTree = Omit<NodeProps, 'children'> & { children?: NodeTree[] }
-type Layers = Record<string, number>
-type OverlayProps = { show: boolean; z: number; close: () => void }
-type PanelListProps = { items: NodeTree[]; drill: (node: NodeTree) => void }
-type PanelSlotProps = { show: boolean; z: number; width: 'w-240' | 'w-250' | 'w-260'; left: 'left-12' | 'left-268' | 'left-528'; gap: 'gap-x'; children: React.ReactNode }
-
-const runtime: { render?: (lang: 'en' | 'ja') => void } = {}
-const NavNode = (_: NodeProps) => null
-const Overlay = ({ show, z, close }: OverlayProps) => <div className="absolute inset-0 bg-overlay backdrop-6" style={{ zIndex: z, display: show ? 'block' : 'none' }} onClick={close} />
-const PanelSlot = ({ show, z, width, left, gap, children }: PanelSlotProps) => (
-        <div className={`absolute p-x ${width} top-68 ${left} grid ${gap} bg-white-strong rounded-2x shadow-xl`} style={{ zIndex: z, display: show ? 'grid' : 'none' }}>
-                {children}
-        </div>
-)
-const PanelList = ({ items, drill }: PanelListProps) => (
-        <>
-                {items.map((item) => (
-                        <div key={item.id} className="grid p-x items-center bg-tile rounded-x shadow-inset-soft cursor" onClick={() => drill(item)}>
-                                <div>{item.label}</div>
-                                <div className="fs-12 text-muted">{item.note}</div>
-                        </div>
-                ))}
-        </>
-)
 const toTree = (input: React.ReactNode): NodeTree[] => {
         const items: NodeTree[] = []
         for (const child of React.Children.toArray(input)) {
                 if (!React.isValidElement(child)) continue
                 if (child.type === React.Fragment) {
+                        // @ts-ignore
                         items.push(...toTree(child.props.children))
                         continue
                 }
@@ -52,7 +28,9 @@ const toTree = (input: React.ReactNode): NodeTree[] => {
         }
         return items
 }
-const menuSpec = (
+const runtime: { render?: (lang: 'en' | 'ja') => void } = {}
+const NavNode = (_: NodeProps) => null
+const menuTree = toTree(
         <>
                 <NavNode id="docs" label="Docs">
                         <NavNode id="lang-en" label="English" note="README.md" action={() => runtime.render?.('en')} />
@@ -121,20 +99,24 @@ const menuSpec = (
                 </NavNode>
         </>
 )
-const menuTree = toTree(menuSpec)
+const Overlay = ({ show, z, close }: { show: boolean; z: number; close: () => void }) => <div className="absolute inset-0 bg-overlay backdrop-6" style={{ zIndex: z, display: show ? 'block' : 'none' }} onClick={close} />
+const PanelSlot = ({ show, z, left, children }: { show: boolean; z: number; left: string; children: React.ReactNode }) => (
+        <div className={`absolute p-x w top-68 ${left} grid gap-y bg-white-strong rounded-2x shadow-xl`} style={{ zIndex: z, display: show ? 'grid' : 'none' }}>
+                {children}
+        </div>
+)
+const PanelList = ({ items, drill }: { items: NodeTree[]; drill: (node: NodeTree) => void }) => (
+        <>
+                {items.map((item) => (
+                        <div key={item.id} className="grid p-yx items-center bg-tile rounded-x shadow-inset-soft cursor" onClick={() => drill(item)}>
+                                <div>{item.label}</div>
+                                <div className="fs-12 text-muted">{item.note}</div>
+                        </div>
+                ))}
+        </>
+)
 
-const resolveNode = (nodes: NodeTree[], path: string[]) => {
-        let branch = nodes
-        let current: NodeTree | undefined
-        for (const id of path) {
-                current = branch.find((n) => n.id === id)
-                branch = current?.children || []
-        }
-        return current
-}
-const pickChildren = (nodes: NodeTree[], path: string[], depth: number) => resolveNode(nodes, path.slice(0, depth + 1))?.children || []
-
-const MenuPlayground = ({ ranks }: { ranks: Layers }) => {
+const MenuPlayground = ({ ranks }: { ranks: Record<string, number> }) => {
         const [path, setPath] = React.useState<string[]>([])
         const layer = (key: string) => ranks[key] ?? 0
         const openRoot = (id: string) => setPath([id])
@@ -154,14 +136,24 @@ const MenuPlayground = ({ ranks }: { ranks: Layers }) => {
                                 return next
                         })
         }
+        const resolveNode = (nodes: NodeTree[], path: string[]) => {
+                let branch = nodes
+                let current: NodeTree | undefined
+                for (const id of path) {
+                        current = branch.find((n) => n.id === id)
+                        branch = current?.children || []
+                }
+                return current
+        }
+        const pickChildren = (nodes: NodeTree[], path: string[], depth: number) => resolveNode(nodes, path.slice(0, depth + 1))?.children || []
         const panelOne = path.length ? pickChildren(menuTree, path, 0) : []
         const panelTwo = path.length > 1 ? pickChildren(menuTree, path, 1) : []
         const detail = path.length > 2 ? resolveNode(menuTree, path) : undefined
         return (
-                <div className="relative p-x w-full min-h-360 bg-grad rounded-3x shadow-lg text-ink overflow-hidden font-sf">
+                <div className="relative p-x w-full h bg-grad rounded-3x shadow-lg text-ink overflow-hidden font-sf">
                         <div className="flex p-x gap-x items-center wrap bg-white rounded-2x shadow-md" style={{ zIndex: layer('menu bar') }}>
                                 {menuTree.map((item) => (
-                                        <button key={item.id} className="border-0 p-x bg-chip rounded-x shadow-inset text-left text-ink font-semibold cursor" onClick={() => openRoot(item.id)}>
+                                        <button key={item.id} className="p-yx bg-chip rounded-x shadow-inset text-left text-ink font-bold cursor" onClick={() => openRoot(item.id)}>
                                                 {item.label}
                                         </button>
                                 ))}
@@ -170,15 +162,15 @@ const MenuPlayground = ({ ranks }: { ranks: Layers }) => {
                                 </a>
                         </div>
                         <Overlay show={!!path.length} z={layer('root overlay')} close={() => close(0)} />
-                        <PanelSlot show={!!path.length} z={layer('primary menu')} width="w-240" left="left-12" gap="gap-x">
+                        <PanelSlot show={!!path.length} z={layer('primary menu')} left="left-x">
                                 <PanelList items={panelOne} drill={(item) => drill(0, item)} />
                         </PanelSlot>
                         <Overlay show={path.length > 1} z={layer('secondary overlay')} close={() => close(1)} />
-                        <PanelSlot show={path.length > 1} z={layer('secondary menu')} width="w-250" left="left-268" gap="gap-x">
+                        <PanelSlot show={path.length > 1} z={layer('secondary menu')} left="left-2x">
                                 <PanelList items={panelTwo} drill={(item) => drill(1, item)} />
                         </PanelSlot>
                         <Overlay show={path.length > 2} z={layer('detail overlay')} close={() => close(2)} />
-                        <PanelSlot show={path.length > 2} z={layer('detail card')} width="w-260" left="left-528" gap="gap-x">
+                        <PanelSlot show={path.length > 2} z={layer('detail card')} left="left-3x">
                                 <div style={{ fontWeight: 700 }}>{detail?.label}</div>
                                 <div className="fs-12 text-muted">{detail?.note || 'Open a link to jump out.'}</div>
                                 {detail?.href ? (
@@ -190,7 +182,7 @@ const MenuPlayground = ({ ranks }: { ranks: Layers }) => {
                 </div>
         )
 }
-
+type CodeBlockProps = { code: string; language: string; inline?: string }
 const CodeBlock = ({ code, language, inline }: CodeBlockProps) => (
         <LiveProvider code={code} language={language} theme={themes.vsLight}>
                 <LiveEditor style={inline === '1' ? { display: 'inline-block', margin: '-10px -4px' } : undefined} />
