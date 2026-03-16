@@ -1,4 +1,5 @@
-import README from './README.md?raw'
+import index from './index' // @ts-ignore
+import README from './README.md?raw' // @ts-ignore
 import README_JA from './README.ja.md?raw'
 import markdownit from 'markdown-it'
 import mermaid from 'mermaid'
@@ -8,7 +9,6 @@ import { createRoot } from 'react-dom/client'
 import { LiveEditor, LiveError, LivePreview, LiveProvider } from 'react-live'
 import { themes } from 'prism-react-renderer'
 import './main.css'
-import index from './index'
 
 type CodeBlockProps = { code: string; language: string; inline?: string }
 type Node = { id: string; label: string; href?: string; note?: string; action?: () => void; children?: Node[] }
@@ -81,10 +81,56 @@ const menuTree: Node[] = [
                 id: 'toc',
                 label: 'TOC',
                 children: [
-                        { id: 'toc-start', label: 'Getting Started', note: 'Installation, Example', href: '#getting-started' },
-                        { id: 'toc-rationale', label: 'Rationale', note: 'Purpose, Core Concepts', href: '#rationale' },
-                        { id: 'toc-pairs', label: 'Pair Catalogue', note: 'Basics, Recursion, Inference', href: '#pair-catalogue' },
-                        { id: 'toc-topology', label: 'Topology Atlas', note: '3/4 node shapes', href: '#topology-atlas' },
+                        {
+                                id: 'toc-rationale',
+                                label: 'Rationale',
+                                href: '#rationale',
+                                children: [
+                                        { id: 'toc-core', label: 'Core Concepts', href: '#core-concepts' },
+                                        { id: 'toc-type', label: 'Type Inference', href: '#type-inference' },
+                                        { id: 'toc-api', label: 'API Surface', href: '#api-surface' },
+                                ],
+                        },
+                        {
+                                id: 'toc-pairs',
+                                label: 'Pair Catalogue',
+                                href: '#pair-catalogue',
+                                children: [
+                                        { id: 'toc-pair-basics', label: 'Pair Basics', href: '#pair-basics' },
+                                        { id: 'toc-pair-recursion', label: 'Pair Recursion', href: '#pair-recursion' },
+                                        { id: 'toc-pair-inference', label: 'Pair Inference', href: '#pair-inference' },
+                                ],
+                        },
+                        {
+                                id: 'toc-topology',
+                                label: 'Topology Atlas',
+                                href: '#topology-atlas',
+                                children: [
+                                        { id: 'toc-three', label: 'Three Nodes', href: '#three-nodes' },
+                                        { id: 'toc-four', label: 'Four Nodes', href: '#four-nodes' },
+                                        { id: 'toc-five', label: 'Five Nodes', href: '#five-nodes' },
+                                ],
+                        },
+                        {
+                                id: 'toc-ext',
+                                label: 'Extensions',
+                                href: '#extensions',
+                                children: [
+                                        { id: 'toc-ext-stability', label: 'Extension Stability', href: '#extension-stability' },
+                                        { id: 'toc-ext-density', label: 'Extension Density', href: '#extension-density' },
+                                        { id: 'toc-ext-packing', label: 'Extension Packing', href: '#extension-packing' },
+                                ],
+                        },
+                        {
+                                id: 'toc-appendix',
+                                label: 'Appendix',
+                                href: '#appendix',
+                                children: [
+                                        { id: 'toc-design', label: 'Design Notes', href: '#design-notes' },
+                                        { id: 'toc-contrib', label: 'Contributing', href: '#contributing' },
+                                        { id: 'toc-license', label: 'License', href: '#license' },
+                                ],
+                        },
                 ],
         },
 ]
@@ -99,8 +145,6 @@ const resolveNode = (nodes: Node[], path: string[]) => {
         return current
 }
 const pickChildren = (nodes: Node[], path: string[], depth: number) => resolveNode(nodes, path.slice(0, depth + 1))?.children || []
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-
 const frame = { position: 'relative', width: '100%', minHeight: '360px', padding: '24px', borderRadius: '16px', background: 'linear-gradient(120deg,#f7f8fb,#eef2f7)', boxShadow: '0 16px 48px rgba(15,23,42,0.12)', color: '#0f172a', overflow: 'hidden', fontFamily: '"SF Pro Display","Helvetica Neue",sans-serif' }
 const bar = { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'rgba(255,255,255,0.86)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 12px 32px rgba(15,23,42,0.14)' }
 const overlay = { position: 'absolute' as const, inset: 0, background: 'rgba(15,23,42,0.18)', backdropFilter: 'blur(6px)' }
@@ -236,11 +280,16 @@ md.renderer.rules.fence = (tokens, idx) => {
 
 const htmlEn = md.render(README)
 const htmlJa = md.render(README_JA)
+const slug = (s: string) =>
+        s
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '')
 
 const App = () => {
         const [blocks, setBlocks] = React.useState<HTMLElement[]>([])
         const [charts, setCharts] = React.useState<HTMLElement[]>([])
-        const ref = React.useRef<HTMLMainElement | null>(null)
+        const ref = React.useRef<HTMLElement | null>(null)
         const renderDoc = (doc: string) => {
                 if (!ref.current) return
                 ref.current.innerHTML = doc

@@ -4,14 +4,22 @@ z-index DAG builder converting declarative stacking rules into stable numeric la
 
 ## Contents
 
+<table>
+<tr>
+<td>
+
 - [Getting Started](#getting-started)
      - [Installation](#installation)
      - [Example](#example)
-- [Rationale](#rationale)
      - [Purpose](#purpose)
+- [Rationale](#rationale)
      - [Core Concepts](#core-concepts)
      - [Type Inference](#type-inference)
      - [API Surface](#api-surface)
+
+</td>
+<td>
+
 - [Pair Catalogue](#pair-catalogue)
      - [Pair Basics](#pair-basics)
      - [Pair Recursion](#pair-recursion)
@@ -19,6 +27,23 @@ z-index DAG builder converting declarative stacking rules into stable numeric la
 - [Topology Atlas](#topology-atlas)
      - [Three Nodes](#three-nodes)
      - [Four Nodes](#four-nodes)
+     - [Five Nodes](#five-nodes)
+
+</td>
+<td>
+
+- [Extensions](#extensions)
+     - [Extension Stability](#extension-stability)
+     - [Extension Density](#extension-density)
+     - [Extension Packing](#extension-packing)
+- [Appendix](#appendix)
+     - [Design Notes](#design-notes)
+     - [Contributing](#contributing)
+     - [License](#license)
+
+</td>
+</tr>
+</table>
 
 ## Getting Started
 
@@ -49,13 +74,13 @@ if (base.badge !== deck.badge) throw Error()
 render(<MenuPlayground ranks={deck} />)
 ```
 
-## Rationale
-
 ### Purpose
 
 z-idx turns declarative partial-order z-relations into numeric stacking ranks that stay stable when extended.
-It accepts linear chains parent-to-children trees, and nested TaggedPairs,
+It accepts linear chains parent-to-children trees, and nested pairs,
 lifting all key names into TypeScript inference so downstream packages share identical numbers even after override phases.
+
+## Rationale
 
 ### Core Concepts
 
@@ -1140,7 +1165,7 @@ z(['a', 'b', 'c', 'd'])
 </td></tr>
 </table>
 
-### Topology: Five Nodes
+### Five Nodes
 
 Five-vertex coverage extends chains, wide fans, multi-source funnels, diamonds with tails, interleaved ladders,
 balanced two-level trees, partial fans with extended child, mid-node splits, and zigzags with cross-links.
@@ -1333,6 +1358,8 @@ z('a', ['b', 'd']), z('b', 'e'), z('b', 'c', 'd')
 </tr>
 </table>
 
+## Extensions
+
 ### Extension Stability
 
 First builds are reproducible: identical inputs yield identical ranks.
@@ -1355,13 +1382,19 @@ Mixing outer inserts with inner midpoints leaves fences intact while layering ad
 Packed sibling gaps across multiple regions (`left, mid, edge, right`) show that each local interval can be subdivided independently across successive overrides, with later splits smaller than half the prior stride.
 Cycles throw an exception immediately, ensuring the DAG assumption holds even in extension calls.
 
+## Appendix
+
 ### Design Notes
 
 Implementation relies on Kahn topological sorting over all declared pairs plus seeded extras, followed by forward and backward constraint propagation to derive lower and upper fences.
 Midpoint assignment favors symmetric spacing; a constant STEP of 1024 defines initial gaps, then bitwise shifts (`>>1`) halve intervals during insertion cascades.
 Fence detection uses binary search to locate neighboring seeds and clamp candidates, keeping determinism across runs.
 
-### Contributing and License
+### Contributing
 
 Contributions should mirror the existing Vitest suites: pair basics, recursion, inference, topology (three through five nodes), extension stability, density, and packing.
 Each scenario should validate ordering, stride constancy, and seed preservation without relying on external fixtures.
+
+### License
+
+MIT
