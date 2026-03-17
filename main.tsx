@@ -1,3 +1,4 @@
+import './main.css'
 import index from './index' // @ts-ignore
 import README from './README.md?raw' // @ts-ignore
 import README_JA from './README.ja.md?raw'
@@ -8,7 +9,6 @@ import { createPortal } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { LiveEditor, LiveError, LivePreview, LiveProvider } from 'react-live'
 import { themes } from 'prism-react-renderer'
-import './main.css'
 type NodeProps = { id: string; label: string; href?: string; note?: string; action?: () => void; children?: React.ReactNode }
 type NodeTree = Omit<NodeProps, 'children'> & { children?: NodeTree[] }
 const toTree = (input: React.ReactNode): NodeTree[] => {
@@ -48,9 +48,9 @@ const menuTree = toTree(
                                 <NavNode id="npm-versions" label="1 Versions" href="https://www.npmjs.com/package/z-idx?activeTab=versions" />
                         </NavNode>
                         <NavNode id="tseijp" label="@tseijp" note="Author">
-                                <NavNode id="tseijp-github" label="Github" note="@tseijp" href="https://twitter.com/tseijp"></NavNode>
+                                <NavNode id="tseijp-github" label="Github" note="@tseijp" href="https://github.com/tseijp"></NavNode>
                                 <NavNode id="tseijp-twitter" label="Twitter" note="@tseijp" href="https://twitter.com/tseijp"></NavNode>
-                                <NavNode id="tseijp-twitter" label="Website" note="tsei.jp" href="https://twitter.com/tseijp"></NavNode>
+                                <NavNode id="tseijp-twitter" label="Website" note="tsei.jp" href="https://tsei.jp"></NavNode>
                         </NavNode>
                 </NavNode>
                 <NavNode id="cases" label="Suites">
@@ -71,35 +71,35 @@ const menuTree = toTree(
                         </NavNode>
                 </NavNode>
                 <NavNode id="toc" label="TOC">
-                        <NavNode id="toc-rationale" label="Rationale">
-                                <NavNode id="toc-core" label="Core Concepts" href="#core-concepts" />
-                                <NavNode id="toc-type" label="Type Inference" href="#type-inference" />
-                                <NavNode id="toc-api" label="API Surface" href="#api-surface" />
+                        <NavNode id="toc-rationale" label="2. Rationale">
+                                <NavNode id="toc-core" label="2.1. Core Concepts" href="#core-concepts" />
+                                <NavNode id="toc-type" label="2.2. Type Inference" href="#type-inference" />
+                                <NavNode id="toc-api" label="2.3. API Surface" href="#api-surface" />
                         </NavNode>
-                        <NavNode id="toc-pairs" label="Pair Catalogue">
-                                <NavNode id="toc-pair-basics" label="Pair Basics" href="#pair-basics" />
-                                <NavNode id="toc-pair-recursion" label="Pair Recursion" href="#pair-recursion" />
-                                <NavNode id="toc-pair-inference" label="Pair Inference" href="#pair-inference" />
+                        <NavNode id="toc-pairs" label="3. Pair Catalogue">
+                                <NavNode id="toc-pair-basics" label="3.1. Pair Basics" href="#pair-basics" />
+                                <NavNode id="toc-pair-recursion" label="3.2. Pair Recursion" href="#pair-recursion" />
+                                <NavNode id="toc-pair-inference" label="3.3. Pair Inference" href="#pair-inference" />
                         </NavNode>
-                        <NavNode id="toc-topology" label="Topology Atlas">
-                                <NavNode id="toc-three" label="Three Nodes" href="#three-nodes" />
-                                <NavNode id="toc-four" label="Four Nodes" href="#four-nodes" />
-                                <NavNode id="toc-five" label="Five Nodes" href="#five-nodes" />
+                        <NavNode id="toc-topology" label="4. Topology Atlas">
+                                <NavNode id="toc-three" label="4.1. Three Nodes" href="#three-nodes" />
+                                <NavNode id="toc-four" label="4.2. Four Nodes" href="#four-nodes" />
+                                <NavNode id="toc-five" label="4.3. Five Nodes" href="#five-nodes" />
                         </NavNode>
-                        <NavNode id="toc-ext" label="Extensions">
-                                <NavNode id="toc-ext-stability" label="Extension Stability" href="#extension-stability" />
-                                <NavNode id="toc-ext-density" label="Extension Density" href="#extension-density" />
-                                <NavNode id="toc-ext-packing" label="Extension Packing" href="#extension-packing" />
+                        <NavNode id="toc-ext" label="5.1 Extensions">
+                                <NavNode id="toc-ext-stability" label="5.1. Extension Stability" href="#extension-stability" />
+                                <NavNode id="toc-ext-density" label="5.2. Extension Density" href="#extension-density" />
+                                <NavNode id="toc-ext-packing" label="5.3. Extension Packing" href="#extension-packing" />
                         </NavNode>
-                        <NavNode id="toc-appendix" label="Appendix">
-                                <NavNode id="toc-design" label="Design Notes" href="#design-notes" />
-                                <NavNode id="toc-contrib" label="Contributing" href="#contributing" />
-                                <NavNode id="toc-license" label="License" href="#license" />
+                        <NavNode id="toc-appendix" label="6. Appendix">
+                                <NavNode id="toc-design" label="6.1. Design Notes" href="#design-notes" />
+                                <NavNode id="toc-contrib" label="6.2. Contributing" href="#contributing" />
+                                <NavNode id="toc-license" label="6.3. License" href="#license" />
                         </NavNode>
                 </NavNode>
         </>
 )
-const Overlay = ({ show, z, close }: { show: boolean; z: number; close: () => void }) => <div className="absolute inset-0 bg-overlay backdrop-6" style={{ zIndex: z, display: show ? 'block' : 'none' }} onClick={close} />
+const Overlay = ({ show, z, close }: { show: boolean; z: number; close: () => void }) => <div className="absolute inset-0 bg-overlay glass" style={{ zIndex: z, display: show ? 'block' : 'none' }} onClick={close} />
 const PanelSlot = ({ show, z, left, children }: { show: boolean; z: number; left: string; children: React.ReactNode }) => (
         <div className={`absolute p-x w top-68 ${left} grid gap-y bg-white-strong rounded-2x shadow-xl`} style={{ zIndex: z, display: show ? 'grid' : 'none' }}>
                 {children}
@@ -110,15 +110,13 @@ const PanelList = ({ items, drill }: { items: NodeTree[]; drill: (node: NodeTree
                 {items.map((item) => (
                         <div key={item.id} className="grid p-yx items-center bg-tile rounded-x shadow-inset-soft cursor" onClick={() => drill(item)}>
                                 <div>{item.label}</div>
-                                <div className="fs-12 text-muted">{item.note}</div>
+                                <div className="font-x text-muted">{item.note}</div>
                         </div>
                 ))}
         </>
 )
-
-const MenuPlayground = ({ ranks }: { ranks: Record<string, number> }) => {
+const MenuPlayground = ({ next }: { next: Record<string, number> }) => {
         const [path, setPath] = React.useState<string[]>([])
-        const layer = (key: string) => ranks[key] ?? 0
         const openRoot = (id: string) => setPath([id])
         const close = (depth: number) => setPath((prev) => prev.slice(0, depth))
         const drill = (depth: number, node: NodeTree) => {
@@ -148,49 +146,38 @@ const MenuPlayground = ({ ranks }: { ranks: Record<string, number> }) => {
         const pickChildren = (nodes: NodeTree[], path: string[], depth: number) => resolveNode(nodes, path.slice(0, depth + 1))?.children || []
         const panelOne = path.length ? pickChildren(menuTree, path, 0) : []
         const panelTwo = path.length > 1 ? pickChildren(menuTree, path, 1) : []
-        const detail = path.length > 2 ? resolveNode(menuTree, path) : undefined
         return (
-                <div className="relative p-x w-full h bg-grad rounded-3x shadow-lg text-ink overflow-hidden font-sf">
-                        <div className="flex p-x gap-x items-center wrap bg-white rounded-2x shadow-md" style={{ zIndex: layer('menu bar') }}>
+                <div className="relative my-x p-x w-full h bg-grad rounded-3x shadow-lg text-ink overflow-hidden font-sf">
+                        <div className="flex p-x gap-x items-center wrap bg-white rounded-2x shadow-md" style={{ zIndex: next['menu bar'] }}>
                                 {menuTree.map((item) => (
-                                        <button key={item.id} className="p-yx bg-chip rounded-x shadow-inset text-left text-ink font-bold cursor" onClick={() => openRoot(item.id)}>
+                                        <button key={item.id} className="p-yx bg-chip rounded-x shadow-inset text-ink font-bold cursor" onClick={() => openRoot(item.id)}>
                                                 {item.label}
                                         </button>
                                 ))}
-                                <a href="https://github.com/tseijp/z-idx" className="ml-auto mr-x text-onyx font-bold tracking-04 no-underline" style={{ zIndex: layer('badge') }} target="_blank" rel="noreferrer">
+                                <a href="https://github.com/tseijp/z-idx" className="ml-auto mr-x text-onyx font-bold tracking" style={{ zIndex: next['Github'] }} target="_blank" rel="noreferrer">
                                         GitHub
                                 </a>
                         </div>
-                        <Overlay show={!!path.length} z={layer('root overlay')} close={() => close(0)} />
-                        <PanelSlot show={!!path.length} z={layer('primary menu')} left="left-x">
+                        <Overlay show={!!path.length} z={next['primary overlay']} close={() => close(0)} />
+                        <PanelSlot show={!!path.length} z={next['primary menu']} left="left-x">
                                 <PanelList items={panelOne} drill={(item) => drill(0, item)} />
                         </PanelSlot>
-                        <Overlay show={path.length > 1} z={layer('secondary overlay')} close={() => close(1)} />
-                        <PanelSlot show={path.length > 1} z={layer('secondary menu')} left="left-2x">
+                        <Overlay show={path.length > 1} z={next['secondary overlay']} close={() => close(1)} />
+                        <PanelSlot show={path.length > 1} z={next['secondary menu']} left="left-2x">
                                 <PanelList items={panelTwo} drill={(item) => drill(1, item)} />
-                        </PanelSlot>
-                        <Overlay show={path.length > 2} z={layer('detail overlay')} close={() => close(2)} />
-                        <PanelSlot show={path.length > 2} z={layer('detail card')} left="left-3x">
-                                <div style={{ fontWeight: 700 }}>{detail?.label}</div>
-                                <div className="fs-12 text-muted">{detail?.note || 'Open a link to jump out.'}</div>
-                                {detail?.href ? (
-                                        <a href={detail.href} className="text-link font-bold no-underline" target="_blank" rel="noreferrer">
-                                                Open
-                                        </a>
-                                ) : null}
                         </PanelSlot>
                 </div>
         )
 }
 type CodeBlockProps = { code: string; language: string; inline?: string }
 const CodeBlock = ({ code, language, inline }: CodeBlockProps) => (
-        <LiveProvider code={code} language={language} theme={themes.vsLight}>
-                <LiveEditor style={inline === '1' ? { display: 'inline-block', margin: '-10px -4px' } : undefined} />
+        <LiveProvider code={code?.trim()} language={language} theme={themes.vsLight}>
+                <LiveEditor style={inline === '1' ? { display: 'inline-block' } : undefined} />
         </LiveProvider>
 )
 const scope = { React, MenuPlayground, index, runtime }
 const LiveBlock = ({ code, language }: CodeBlockProps) => (
-        <LiveProvider code={code} language={language} theme={themes.vsLight} scope={scope} noInline>
+        <LiveProvider code={code?.trim()} language={language} theme={themes.vsLight} scope={scope} noInline>
                 <div className="live-block">
                         <LiveEditor className="prism-code" />
                         <div className="live-output">
@@ -269,3 +256,6 @@ const App = () => {
 }
 
 createRoot(document.getElementById('app')!).render(<App />)
+
+// @ts-ignore
+window.index = index

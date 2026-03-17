@@ -1,14 +1,14 @@
 :root {
         --x: calc(1rem / 1.618);
         --y: calc(var(--x) / 1.618);
-        --z: calc(1rem * 1.618);
-        --h: 293px;
+        --z: calc(1em * 1.618);
+        --t: calc(var(--x) * 3 + var(--y) * 3 + var(--z));
+        --h: calc(var(--x) * 3 + var(--y) * 14 + var(--z) * 5 + var(--t));
         --w: calc(var(--h) / 1.618);
         --ink: #0f172a;
         --onyx: #111827;
         --muted: #475569;
         --faint: #cbd5e1;
-        --link: #2563eb;
         --cyan: #22d3ee;
         --tile: #f1f5f9;
         --chip: #f8fafc;
@@ -23,11 +23,35 @@
         --shadow-inset: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
         --shadow-inset-soft: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
 }
-
-* {
+*,
+:after,
+:before,
+::backdrop,
+::file-selector-button {
         line-height: var(--z);
+        box-sizing: border-box;
+        border: 0 solid;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
 }
-
+*::-webkit-scrollbar {
+        display: none;
+}
+foreignObject {
+        overflow: visible !important;
+}
+pre {
+        padding: 0 !important;
+}
+html,
+body {
+        top: 0;
+        left: 0;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+}
 main {
         max-width: 1000px;
         margin: var(--z) auto;
@@ -35,17 +59,17 @@ main {
         color: #1f2937;
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
 }
-
 table {
         display: block;
         max-width: 100%;
         overflow-x: auto;
 }
-
+a {
+        text-decoration: none;
+}
 button {
         border: 0;
 }
-
 .mermaid-block {
         width: 256px;
 }
@@ -59,7 +83,7 @@ button {
         inset: 0;
 }
 .top-68 {
-        top: 68px;
+        top: var(--t);
 }
 .left-x {
         left: var(--x);
@@ -69,6 +93,9 @@ button {
 }
 .left-3x {
         left: calc(var(--w) * 2 - 3 * var(--x));
+}
+.my-x {
+        margin: var(--x) 0;
 }
 .p-x {
         padding: var(--x);
@@ -154,10 +181,7 @@ button {
 .text-muted {
         color: var(--muted);
 }
-.text-link {
-        color: var(--link);
-}
-.fs-12 {
+.font-x {
         font-size: var(--x);
         line-height: 1rem;
 }
@@ -167,7 +191,7 @@ button {
 .font-bold {
         font-weight: 700;
 }
-.tracking-04 {
+.tracking {
         letter-spacing: 0.4px;
 }
 .ml-auto {
@@ -179,12 +203,9 @@ button {
 .cursor {
         cursor: pointer;
 }
-.text-left {
-        text-align: left;
-}
 .overflow-hidden {
         overflow: hidden;
 }
-.no-underline {
-        text-decoration: none;
+.glass {
+        backdrop-filter: blur(4px);
 }

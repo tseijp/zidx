@@ -5,41 +5,41 @@ z-index DAG builder converting declarative stacking rules into stable numeric la
 ## Contents
 
 <table>
-<tr>
-<td>
+<tr valign="top">
+<td nowrap>
 
-- [Getting Started](#getting-started)
-     - [Installation](#installation)
-     - [Example](#example)
-     - [Purpose](#purpose)
-- [Rationale](#rationale)
-     - [Core Concepts](#core-concepts)
-     - [Type Inference](#type-inference)
-     - [API Surface](#api-surface)
-
-</td>
-<td>
-
-- [Pair Catalogue](#pair-catalogue)
-     - [Pair Basics](#pair-basics)
-     - [Pair Recursion](#pair-recursion)
-     - [Pair Inference](#pair-inference)
-- [Topology Atlas](#topology-atlas)
-     - [Three Nodes](#three-nodes)
-     - [Four Nodes](#four-nodes)
-     - [Five Nodes](#five-nodes)
+1. [Getting Started](#getting-started)
+      1. [Installation](#installation)
+      2. [Example](#example)
+      3. [Purpose](#purpose)
+2. [Rationale](#rationale)
+      1. [Core Concepts](#core-concepts)
+      2. [Type Inference](#type-inference)
+      3. [API Surface](#api-surface)
 
 </td>
-<td>
+<td nowrap>
 
-- [Extensions](#extensions)
-     - [Extension Stability](#extension-stability)
-     - [Extension Density](#extension-density)
-     - [Extension Packing](#extension-packing)
-- [Appendix](#appendix)
-     - [Design Notes](#design-notes)
-     - [Contributing](#contributing)
-     - [License](#license)
+3. [Pair Catalogue](#pair-catalogue)
+      1. [Pair Basics](#pair-basics)
+      2. [Pair Recursion](#pair-recursion)
+      3. [Pair Inference](#pair-inference)
+4. [Topology Atlas](#topology-atlas)
+      1. [Three Nodes](#three-nodes)
+      2. [Four Nodes](#four-nodes)
+      3. [Five Nodes](#five-nodes)
+
+</td>
+<td nowrap>
+
+5. [Extensions](#extensions)
+      1. [Extension Stability](#extension-stability)
+      2. [Extension Density](#extension-density)
+      3. [Extension Packing](#extension-packing)
+6. [Appendix](#appendix)
+      1. [Design Notes](#design-notes)
+      2. [Contributing](#contributing)
+      3. [License](#license)
 
 </td>
 </tr>
@@ -58,20 +58,17 @@ npm i z-idx
 <!-- prettier-ignore -->
 ```tsx
 const base = index((z) => [
-  z('menu bar', 'root overlay', 'primary menu'),
-  z('primary menu', ['secondary overlay', 'badge'])
+    z('menu bar', 'primary overlay', 'primary menu'),
+    z('primary overlay', 'Github')
 ])
 
-const deck = base((z) => [
-  z('root overlay', 'legend box'),
-  z('secondary overlay', 'secondary menu'),
-  z('secondary menu', ['detail overlay', 'detail card']),
-  z('detail overlay', 'legend box')
+const next = base((z) => [
+    z('primary menu', 'secondary overlay', 'secondary menu'),
 ])
 
-if (base.badge !== deck.badge) throw Error()
+if (base.Github !== next.Github) throw Error()
 
-render(<MenuPlayground ranks={deck} />)
+render(<MenuPlayground next={next} />)
 ```
 
 ### Purpose
@@ -84,10 +81,10 @@ lifting all key names into TypeScript inference so downstream packages share ide
 
 ### Core Concepts
 
-A z-idx build receives a helper z. Passing multiple strings like z('a','b','c') emits ordered pairs `a<b<c` with uniform stride.
-Passing a parent and an array such as z('a',['b','c','d']) links the parent below each child while keeping siblings equally spaced.
+A z-idx build receives a helper z. Passing multiple strings like `z('a','b','c') `emits ordered pairs `a<b<c` with uniform stride.
+Passing a parent and an array such as `z('a',['b','c','d'])` links the parent below each child while keeping siblings equally spaced.
 Nested arrays or previously returned TaggedPairs can be embedded, enabling tree-shaped DAGs without losing ordering.
-Ranks start with a wide STEP (1<<10) so later inserts can bisect gaps without moving seeded nodes.
+Ranks start with a wide STEP (`1<<10`) so later inserts can bisect gaps without moving seeded nodes.
 A topological pass (Kahn) rejects cycles; a second pass computes lower and upper bounds per node,
 clamps against seeded fences, then selects midpoints, pushing narrow gaps into warns.
 
@@ -147,9 +144,8 @@ Nested pair arrays `z('a',[z('b','c')])` flatten to the same order.
 Late-arriving ancestor pairs still yield the canonical topological sequence.
 
 <table>
-<tr><th colspan="6">Three-node DAGs (all 6)</th></tr>
 <tr valign="bottom">
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart TB
@@ -165,7 +161,7 @@ z(['a', 'b', 'c'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart TB
@@ -182,7 +178,7 @@ z('a', 'b')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart TB
@@ -200,7 +196,7 @@ z('a', ['b', 'c'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart TB
@@ -218,7 +214,7 @@ z(['b', 'c'], 'a')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart TB
@@ -236,7 +232,7 @@ z('a', 'b', 'c')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart TB
@@ -266,9 +262,10 @@ reversed sibling order `a->[d,c,b]`, cross-braced ladders `a->b, a->c, b->c, c->
 parallel roots with tails, and dual roots merging before a sink.
 Uniform gaps persist regardless of edge density, demonstrating deterministic spacing across all enumerated isomorphism classes.
 
+#### 6 edges
+
 <table>
-<tr><th>6 edges</th></tr>
-<tr valign="bottom"><td>
+<tr valign="bottom"><td nowrap>
 
 ```mermaid
 flowchart LR
@@ -295,14 +292,18 @@ flowchart LR
 ```
 
 ```ts
-z('a', ['b', 'c', 'd']), z(['b', 'c'], 'd'), z('b', 'c')
+z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')
 ```
 
-</td></tr>
+</td>
+</tr>
+</table>
 
-<tr><th>5 edges</th></tr>
+#### 5 edges
+
+<table>
 <tr valign="bottom">
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -332,7 +333,7 @@ z('a', ['b', 'c', 'd']), z('b', ['c', 'd'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -362,7 +363,7 @@ z('a', ['b', 'c', 'd']), z('b', 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -392,7 +393,7 @@ z('a', ['b', 'c', 'd']), z(['b', 'c'], 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -419,11 +420,11 @@ flowchart LR
 ```
 
 ```ts
-z('a', ['b', 'c']), z('b', ['c', 'd']), z('c', 'd')
+z('a', 'b', ['c', 'd']), z('a', 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -450,11 +451,11 @@ flowchart LR
 ```
 
 ```ts
-z('a', ['b', 'd']), z('b', ['c', 'd']), z('c', 'd')
+z('a', 'b', ['c', 'd']), z(['a', 'c'], 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -486,10 +487,13 @@ z('a', ['c', 'd']), z('b', ['c', 'd']), z('c', 'd')
 
 </td>
 </tr>
+</table>
 
-<tr><th>4 edges</th></tr>
+#### 4 edges
+
+<table>
 <tr valign="bottom">
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -519,7 +523,7 @@ z('a', ['b', 'c', 'd']), z('b', 'c')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -549,7 +553,7 @@ z('a', ['b', 'c']), z('b', ['c', 'd'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -579,7 +583,7 @@ z('a', ['c', 'd']), z('b', ['c', 'd'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -609,7 +613,7 @@ z('a', ['b', 'c']), z('b', 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -639,7 +643,7 @@ z('a', ['b', 'd']), z('b', 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -669,7 +673,7 @@ z('a', ['c', 'd']), z('b', 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -697,7 +701,7 @@ z('a', ['b', 'c']), z(['b', 'c'], 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -726,7 +730,7 @@ z('a', ['c', 'd']), z(['b', 'c'], 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -747,19 +751,23 @@ flowchart LR
     a --> b
     b --> c
     b --> d
+    c --> d
 
 ```
 
 ```ts
-z('a', 'b', 'c'), z(['b', 'c'], 'd')
+z('a', 'b', 'c', 'd'), z('b', 'd')
 ```
 
 </td>
 </tr>
+</table>
 
-<tr><th>3 edges</th></tr>
+#### 3 edges
+
+<table>
 <tr valign="bottom">
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -788,7 +796,7 @@ z('a', ['b', 'c', 'd'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -817,7 +825,7 @@ z('a', ['b', 'c']), z('b', 'c')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -846,7 +854,7 @@ z('a', ['c', 'd']), z('b', 'c')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -875,7 +883,7 @@ z('a', 'b'), z('b', ['c', 'd'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -904,7 +912,7 @@ z('a', 'b', 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -929,11 +937,11 @@ flowchart LR
 ```
 
 ```ts
-z(['a', 'b'], 'c'), z('c', 'd')
+z(['a', 'b'], 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -962,7 +970,7 @@ z('a', 'd'), z('b', 'c', 'd')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -992,10 +1000,13 @@ z(['a', 'b', 'c'], 'd')
 
 </td>
 </tr>
+</table>
 
-<tr><th>2 edges</th></tr>
+#### 2 edges
+
+<table>
 <tr valign="bottom">
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1019,11 +1030,11 @@ flowchart LR
 ```
 
 ```ts
-z('a', ['b', 'c'])
+z('a', 'b', 'c')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1047,11 +1058,11 @@ flowchart LR
 ```
 
 ```ts
-z('a', 'b', 'c')
+z('a', ['b', 'c'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1078,7 +1089,7 @@ z(['a', 'b'], 'c')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1107,9 +1118,12 @@ z('a', 'd'), z('b', 'c')
 
 </td>
 </tr>
+</table>
 
-<tr><th>1 edge</th></tr>
-<tr><td>
+#### 1 edges
+
+<table>
+<tr><td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1135,10 +1149,14 @@ flowchart LR
 z('a', 'b')
 ```
 
-</td></tr>
+</td>
+</tr>
+</table>
 
-<tr><th>0 edge</th></tr>
-<tr><td>
+#### 0 edges
+
+<table>
+<tr><td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1162,20 +1180,21 @@ flowchart LR
 z(['a', 'b', 'c', 'd'])
 ```
 
-</td></tr>
+</td>
+</tr>
 </table>
 
 ### Five Nodes
 
 Five-vertex coverage extends chains, wide fans, multi-source funnels, diamonds with tails, interleaved ladders,
-balanced two-level trees, partial fans with extended child, mid-node splits, and zigzags with cross-links.
+balanced two-level trees, partial fans with extended child, mid-node splits, and diamonds with head.
 Each construction confirms sorted order, equal stride between consecutive nodes in the topological sequence, and stable root-to-leaf monotonicity even as edges multiply.
 The tests validate that every key participates in the final ordering and that no hidden permutations violate declared constraints.
 
 <table>
 <tr><th>chain</th><th>wide fan</th><th>funnel</th><th>diamond tail</th></tr>
 <tr valign="bottom">
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1185,8 +1204,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
-    a --> b --> c --> d --> e
     style g fill:none,stroke:none,color:none
+    a --> b
+    b --> c
+    c --> d
+    d --> e
 ```
 
 ```ts
@@ -1194,7 +1216,7 @@ z('a', 'b', 'c', 'd', 'e')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1204,11 +1226,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     a --> d
     a --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1216,7 +1238,7 @@ z('a', ['b', 'c', 'd', 'e'])
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1226,11 +1248,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> e
     b --> e
     c --> e
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1238,7 +1260,7 @@ z(['a', 'b', 'c', 'd'], 'e')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1248,24 +1270,24 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     b --> d
     c --> d
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
-z('a', 'b', 'c', 'd', 'e'), z('a', 'c', 'd')
+z('a', 'b', 'd', 'e'), z('a', 'c', 'd')
 ```
 
 </td>
 </tr>
 
-<tr><th>interleaved ladders</th><th>balanced two-level</th><th>fan with deep child</th><th>zigzag cross</th></tr>
+<tr><th>interleaved ladders</th><th>balanced two-level</th><th>fan with deep child</th><th>diamond head</th></tr>
 <tr valign="bottom">
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1275,12 +1297,12 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     b --> e
     a --> c
     c --> d
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1288,7 +1310,7 @@ z('a', 'b', 'e'), z('a', 'c', 'd', 'e')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1298,19 +1320,19 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     b --> d
     c --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
-z('a', ['b', 'c']), z('b', 'd'), z('c', 'e')
+z('a', 'b', 'd'), z('a', 'c', 'e')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1320,11 +1342,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     a --> d
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1332,7 +1354,7 @@ z('a', ['b', 'c', 'd']), z('d', 'e')
 ```
 
 </td>
-<td>
+<td nowrap>
 
 ```mermaid
 flowchart LR
@@ -1342,16 +1364,16 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     b --> c
-    a --> d
-    d --> e
+    b --> d
     c --> e
-    style g fill:none,stroke:none,color:none
+    d --> e
 ```
 
 ```ts
-z('a', ['b', 'd']), z('b', 'e'), z('b', 'c', 'd')
+z('a', 'b', 'c', 'd'), z('b', 'd', 'e')
 ```
 
 </td>

@@ -23,7 +23,6 @@ const clamp = (x: number, a: number, b: number): number => (x < a ? a : x > b ? 
 const isPair = (v: unknown): v is Pair => Array.isArray(v) && v.length === 2 && typeof v[0] === 'string' && typeof v[1] === 'string'
 const rootOfPairs = (arr: Pair[]): string => (arr.length ? arr[0][0] : '')
 const pair: ZPair = ((...keys: readonly [string, ...Node[]] | readonly [string, string, ...string[]]) => {
-        if (keys.length < 2) throw new Error('need two keys')
         const res: Pair[] = []
         const parent = keys[0] as string
         const link = (p: string, node: Node): void => {
@@ -190,4 +189,4 @@ export function index<P extends readonly unknown[]>(build: (z: ZPair) => P): ZAp
         return api<Keys<P>>(assign<Keys<P>>(pairs))
 }
 
-export default index;
+export default index
