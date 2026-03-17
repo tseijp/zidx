@@ -154,10 +154,7 @@ describe('type inference and edge cases', () => {
 
         describe('combined tagged + array + linear key inference', () => {
                 it('all keys present and basic ordering', () => {
-                        const res = index((z) => [
-                                z('a', ['b', 'c']),
-                                z('b', [z('d', ['e', z('f', 'g')]), 'h']),
-                        ])
+                        const res = index((z) => [z('a', ['b', 'c']), z('b', [z('d', ['e', z('f', 'g')]), 'h'])])
                         expectTypeOf(res.a).toBeNumber()
                         expectTypeOf(res.b).toBeNumber()
                         expectTypeOf(res.c).toBeNumber()
@@ -175,10 +172,7 @@ describe('type inference and edge cases', () => {
                 })
 
                 it.skip('combined tagged + array + linear: g < h and h < c', () => {
-                        const res = index((z) => [
-                                z('a', ['b', 'c']),
-                                z('b', [z('d', ['e', z('f', 'g')]), 'h']),
-                        ])
+                        const res = index((z) => [z('a', ['b', 'c']), z('b', [z('d', ['e', z('f', 'g')]), 'h'])])
                         expect(res.g).toBeLessThan(res.h)
                         expect(res.h).toBeLessThan(res.c)
                 })
@@ -203,9 +197,7 @@ describe('type inference and edge cases', () => {
                 })
 
                 it('complex nested: multiple layers all surface in type', () => {
-                        const res = index((z) => [
-                                z('root', [z('l1', [z('l2a', 'leaf1'), 'leaf2']), z('r1', ['leaf3', 'leaf4'])]),
-                        ])
+                        const res = index((z) => [z('root', [z('l1', [z('l2a', 'leaf1'), 'leaf2']), z('r1', ['leaf3', 'leaf4'])])])
                         expectTypeOf(res.root).toBeNumber()
                         expectTypeOf(res.l1).toBeNumber()
                         expectTypeOf(res.l2a).toBeNumber()

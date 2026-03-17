@@ -69,9 +69,7 @@ describe('five nodes', () => {
 
         describe('stride uniformity', () => {
                 it('chain stride is constant across all gaps', () => {
-                        const r = dag((z) => [z('a', 'b', 'c', 'd', 'e')])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', 'b', 'c', 'd', 'e')]).nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                         expect(r.d - r.c).toBe(S)
@@ -79,9 +77,7 @@ describe('five nodes', () => {
                 })
 
                 it('wide fan children are all same rank', () => {
-                        const r = dag((z) => [z('a', ['b', 'c', 'd', 'e'])])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', ['b', 'c', 'd', 'e'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)
                         expect(r.d).toBe(r.e)
@@ -92,8 +88,7 @@ describe('five nodes', () => {
                 it('z("a","b"), z("c","d","e") are independent', () => {
                         const r = dag((z) => [z('a', 'b'), z('c', 'd', 'e')])
                                 .edges(['a', 'b'], ['c', 'd'], ['d', 'e'])
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.d - r.c).toBe(S)
                         expect(r.e - r.d).toBe(S)

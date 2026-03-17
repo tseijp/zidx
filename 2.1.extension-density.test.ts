@@ -176,10 +176,7 @@ describe('extension density and gap shrinkage', () => {
                         const e6 = e5((z) => [z('a', 'n6', 'n5')])
                         const e7 = e6((z) => [z('a', 'n7', 'n6')])
                         const e8 = e7((z) => [z('a', 'n8', 'n7')])
-                        const gaps = [
-                                e1.n1 - base.a, e2.n2 - base.a, e3.n3 - base.a, e4.n4 - base.a,
-                                e5.n5 - base.a, e6.n6 - base.a, e7.n7 - base.a, e8.n8 - base.a,
-                        ]
+                        const gaps = [e1.n1 - base.a, e2.n2 - base.a, e3.n3 - base.a, e4.n4 - base.a, e5.n5 - base.a, e6.n6 - base.a, e7.n7 - base.a, e8.n8 - base.a]
                         for (let i = 1; i < gaps.length; i += 1) expect(gaps[i]).toBeLessThan(gaps[i - 1])
                 })
         })

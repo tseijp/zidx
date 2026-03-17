@@ -100,8 +100,7 @@ describe('four nodes', () => {
                 })
 
                 it.skip('4e-8: a fan [c,d] plus [b,c] < d', () => {
-                        dag((z) => [z('a', ['c', 'd']), z(['b', 'c'], 'd')])
-                                .edges(['a', 'c'], ['a', 'd'], ['b', 'd'], ['c', 'd'])
+                        dag((z) => [z('a', ['c', 'd']), z(['b', 'c'], 'd')]).edges(['a', 'c'], ['a', 'd'], ['b', 'd'], ['c', 'd'])
                 })
 
                 it('4e-9: a chain b chain c chain d plus b chain d', () => {
@@ -205,42 +204,33 @@ describe('four nodes', () => {
 
         describe('0 edges', () => {
                 it.skip('0e-1: all same rank [a,b,c,d]', () => {
-                        dag((z) => [z(['a', 'b', 'c', 'd'])])
-                                .relative(['a', 'b', 'c', 'd'])
+                        dag((z) => [z(['a', 'b', 'c', 'd'])]).relative(['a', 'b', 'c', 'd'])
                 })
         })
 
         describe('stride uniformity', () => {
                 it('four-node chain has uniform stride S', () => {
-                        const r = dag((z) => [z('a', 'b', 'c', 'd')])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', 'b', 'c', 'd')]).nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                         expect(r.d - r.c).toBe(S)
                 })
 
                 it('fan a < [b,c,d] children share same rank', () => {
-                        const r = dag((z) => [z('a', ['b', 'c', 'd'])])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', ['b', 'c', 'd'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)
                 })
 
                 it('complete DAG preserves uniform stride', () => {
-                        const r = dag((z) => [z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')]).nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                         expect(r.d - r.c).toBe(S)
                 })
 
                 it('disconnected pair edges have independent stride', () => {
-                        const r = dag((z) => [z('a', 'd'), z('b', 'c')])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', 'd'), z('b', 'c')]).nowarn().raw
                         expect(r.d - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                 })

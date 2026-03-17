@@ -4,8 +4,7 @@ import { dag, index, S } from './utils'
 describe('three nodes', () => {
         describe('6 non-isomorphic DAG shapes', () => {
                 it.skip('pattern 1 - 0 edges: all same rank', () => {
-                        dag((z) => [z(['a', 'b', 'c'])])
-                                .relative(['a', 'b', 'c'])
+                        dag((z) => [z(['a', 'b', 'c'])]).relative(['a', 'b', 'c'])
                 })
 
                 it('pattern 2 - 1 edge: a < b', () => {
@@ -72,8 +71,7 @@ describe('three nodes', () => {
                 it('chain a < b < c has uniform stride', () => {
                         const r = dag((z) => [z('a', 'b', 'c')])
                                 .relative('a', 'b', 'c')
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                 })
@@ -81,15 +79,12 @@ describe('three nodes', () => {
                 it('fan out a < [b, c] has equal spacing from parent', () => {
                         const r = dag((z) => [z('a', ['b', 'c'])])
                                 .relative('a', ['b', 'c'])
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(r.c - r.a)
                 })
 
                 it('single edge stride equals S', () => {
-                        const r = dag((z) => [z('a', 'b')])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', 'b')]).nowarn().raw
                         expect(r.b - r.a).toBe(S)
                 })
         })
@@ -104,12 +99,8 @@ describe('three nodes', () => {
 
         describe('equivalent constructions', () => {
                 it('complete DAG from two z calls matches three z calls', () => {
-                        const r1 = dag((z) => [z('a', 'b', 'c'), z('a', 'c')])
-                                .nowarn()
-                                .raw
-                        const r2 = dag((z) => [z('a', 'b'), z('a', 'c'), z('b', 'c')])
-                                .nowarn()
-                                .raw
+                        const r1 = dag((z) => [z('a', 'b', 'c'), z('a', 'c')]).nowarn().raw
+                        const r2 = dag((z) => [z('a', 'b'), z('a', 'c'), z('b', 'c')]).nowarn().raw
                         expect(r1.a).toBeLessThan(r1.b)
                         expect(r1.b).toBeLessThan(r1.c)
                         expect(r2.a).toBeLessThan(r2.b)
@@ -136,16 +127,12 @@ describe('three nodes', () => {
 
         describe('fan out equal spacing', () => {
                 it('z("a", ["b", "c"]) children are equidistant from parent', () => {
-                        const r = dag((z) => [z('a', ['b', 'c'])])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', ['b', 'c'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                 })
 
                 it('z("a", ["b", "c", "d"]) all children same rank', () => {
-                        const r = dag((z) => [z('a', ['b', 'c', 'd'])])
-                                .nowarn()
-                                .raw
+                        const r = dag((z) => [z('a', ['b', 'c', 'd'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)
                 })

@@ -65,13 +65,9 @@ describe('TaggedPairs recursion', () => {
 
         describe('chain then tagged branch', () => {
                 it('chain + tagged branch ordering', () => {
-                        const r = dag((z) => [
-                                z('a', 'b', 'c'),
-                                z('b', [z('d', ['e', 'f']), 'g']),
-                        ])
+                        const r = dag((z) => [z('a', 'b', 'c'), z('b', [z('d', ['e', 'f']), 'g'])])
                                 .edges(['a', 'b'], ['b', 'c'], ['b', 'd'], ['d', 'e'], ['d', 'f'], ['b', 'g'])
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.a).toBeLessThan(r.b)
                         expect(r.b).toBeLessThan(r.d)
                         expect(r.d).toBeLessThan(r.e)
@@ -79,10 +75,7 @@ describe('TaggedPairs recursion', () => {
                 })
 
                 it.skip('chain + tagged branch: f < g and g < c', () => {
-                        const r = dag((z) => [
-                                z('a', 'b', 'c'),
-                                z('b', [z('d', ['e', 'f']), 'g']),
-                        ]).raw
+                        const r = dag((z) => [z('a', 'b', 'c'), z('b', [z('d', ['e', 'f']), 'g'])]).raw
                         expect(r.f).toBeLessThan(r.g)
                         expect(r.g).toBeLessThan(r.c)
                 })
@@ -127,10 +120,7 @@ describe('TaggedPairs recursion', () => {
         describe('two-level fan', () => {
                 it('z("a",[z("b",["c","d"]),z("e",["f","g"])])', () => {
                         dag((z) => [z('a', [z('b', ['c', 'd']), z('e', ['f', 'g'])])])
-                                .edges(
-                                        ['a', 'b'], ['b', 'c'], ['b', 'd'],
-                                        ['a', 'e'], ['e', 'f'], ['e', 'g'],
-                                )
+                                .edges(['a', 'b'], ['b', 'c'], ['b', 'd'], ['a', 'e'], ['e', 'f'], ['e', 'g'])
                                 .nowarn()
                 })
         })
@@ -151,8 +141,7 @@ describe('TaggedPairs recursion', () => {
                 it('tagged chain preserves uniform stride', () => {
                         const r = dag((z) => [z('a', [z('b', [z('c', 'd')])])])
                                 .relative('a', 'b', 'c', 'd')
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                         expect(r.d - r.c).toBe(S)

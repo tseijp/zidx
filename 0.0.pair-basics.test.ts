@@ -6,16 +6,14 @@ describe('z function basic API', () => {
                 it('two-key chain: a < b with stride S', () => {
                         const r = dag((z) => [z('a', 'b')])
                                 .relative('a', 'b')
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                 })
 
                 it('three-key chain: a < b < c with uniform stride', () => {
                         const r = dag((z) => [z('a', 'b', 'c')])
                                 .relative('a', 'b', 'c')
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                 })
@@ -23,8 +21,7 @@ describe('z function basic API', () => {
                 it('four-key chain: a < b < c < d with uniform stride', () => {
                         const r = dag((z) => [z('a', 'b', 'c', 'd')])
                                 .relative('a', 'b', 'c', 'd')
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                         expect(r.d - r.c).toBe(S)
@@ -33,8 +30,7 @@ describe('z function basic API', () => {
                 it('five-key chain: a < b < c < d < e with uniform stride', () => {
                         const r = dag((z) => [z('a', 'b', 'c', 'd', 'e')])
                                 .relative('a', 'b', 'c', 'd', 'e')
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                         expect(r.d - r.c).toBe(S)
@@ -131,8 +127,7 @@ describe('z function basic API', () => {
                 it('three overlapping pairs form consistent chain', () => {
                         const r = dag((z) => [z('a', 'b'), z('b', 'c'), z('c', 'd')])
                                 .relative('a', 'b', 'c', 'd')
-                                .nowarn()
-                                .raw
+                                .nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
                         expect(r.d - r.c).toBe(S)
