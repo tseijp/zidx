@@ -27,26 +27,6 @@ describe('z index pair basics 0.0', () => {
                 expect(res.d - res.c).toBe(stride)
         })
 
-        // @TODO FIX
-        // it('treats nested arrays of siblings as the same level under one parent', () => {
-        //         const res = index((z) => [
-        //                 z('a', [
-        //                         ['b', 'c'],
-        //                         ['d', 'e'],
-        //                 ]),
-        //         ])
-        //         const stride = res.b - res.a
-
-        //         expect(res.warns).toEqual([])
-        //         expect(res.b).toBeGreaterThan(res.a)
-        //         expect(res.c).toBeGreaterThan(res.a)
-        //         expect(res.d).toBeGreaterThan(res.a)
-        //         expect(res.e).toBeGreaterThan(res.a)
-        //         expect(res.c - res.b).toBe(stride)
-        //         expect(res.d - res.c).toBe(stride)
-        //         expect(res.e - res.d).toBe(stride)
-        // })
-
         it('mixes linear and tree declarations in one build while keeping stride stable', () => {
                 const res = index((z) => [z('a', 'b', 'c'), z('b', ['d', 'e'])])
                 const stride = res.b - res.a

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import index from "./index";
+import index from './index'
 
 describe('z index pair inference 0.2', () => {
         it('recurses through nested tagged subtrees and preserves uniform steps', () => {
@@ -76,18 +76,5 @@ describe('z index pair inference 0.2', () => {
                 // @TODO FIX
                 // expect(res.g).toBeLessThan(res.h)
                 // expect(res.h).toBeLessThan(res.c)
-
-                // @TODO FIX
-                // expectTypeOf(res).toMatchTypeOf<{
-                //         a: number
-                //         b: number
-                //         c: number
-                //         d: number
-                //         e: number
-                //         f: number
-                //         g: number
-                //         h: number
-                //         warns: string[]
-                // }>()
         })
 })

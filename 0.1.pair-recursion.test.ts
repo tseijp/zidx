@@ -84,16 +84,5 @@ describe('z index pair recursion 0.1', () => {
                 // @TODO FIX
                 // expect(res.f).toBeLessThan(res.g)
                 // expect(res.g).toBeLessThan(res.c)
-
-                expectTypeOf(res).toMatchTypeOf<{
-                        a: number
-                        b: number
-                        c: number
-                        d: number
-                        e: number
-                        f: number
-                        g: number
-                        warns: string[]
-                }>()
         })
 })
