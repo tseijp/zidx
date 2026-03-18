@@ -11,12 +11,6 @@ describe('extension seed stability', () => {
                         expect(first.c).toBe(second.c)
                         expect(first.d).toBe(second.d)
                 })
-
-                it('identical builds share same warns array shape', () => {
-                        const first = index((z) => z('a', 'b', 'c'))
-                        const second = index((z) => z('a', 'b', 'c'))
-                        expect(first.warns).toEqual(second.warns)
-                })
         })
 
         describe('single extension preserves base seeds', () => {

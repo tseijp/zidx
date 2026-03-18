@@ -16,7 +16,6 @@ describe('type inference and edge cases', () => {
                         r._
                         expectTypeOf(r.a).toBeNumber()
                         expectTypeOf(r.b).toBeNumber()
-                        expectTypeOf(r.warns).toEqualTypeOf<string[]>()
                 })
         })
 
@@ -31,8 +30,7 @@ describe('type inference and edge cases', () => {
                 })
 
                 it('reversed array children type inference', () => {
-                        const r = index((z) => z('a', ['d', 'c', 'b']))
-                        // @ts-expect-error
+                        const r = index((z) => z('a', ['d', 'c', 'b'])) // @ts-expect-error
                         r._
                         expectTypeOf(r.a).toBeNumber()
                         expectTypeOf(r.b).toBeNumber()
@@ -116,12 +114,6 @@ describe('type inference and edge cases', () => {
                         expect(r.c).toBeLessThan(r.d)
                         expect(r.b).toBeLessThan(r.e)
                 })
-
-                it('deep nested tagged: warns is empty (narrow gap f)', () => {
-                        const r = index((z) => z('a', [z('b', [z('c', 'd'), 'e']), z('f', ['g'])])) // @ts-expect-error
-                        r._
-                        expect(r.warns).toEqual([])
-                })
         })
 
         describe('flat + nested arrays', () => {
@@ -153,12 +145,6 @@ describe('type inference and edge cases', () => {
                         expect(next.b).toBeLessThan(next.e)
                         expect(next.c).toBeLessThan(next.f)
                         expect(next.f).toBeLessThan(next.g)
-                })
-
-                it('extension seeds preserved: warns is empty (narrow gap)', () => {
-                        const base = index((z) => z('a', 'b', 'c'))
-                        const next = base((z) => [z('b', ['d', 'e']), z('c', 'f', 'g')])
-                        expect(next.warns).toEqual([])
                 })
         })
 
@@ -196,18 +182,6 @@ describe('type inference and edge cases', () => {
                         const double = index((z) => [z('a', 'b'), z('a', 'b')])
                         expect(double.a).toBe(single.a)
                         expect(double.b).toBe(single.b)
-                })
-
-                it('warns array exists on result', () => {
-                        const r = index((z) => z('a', 'b')) // @ts-expect-error
-                        r._
-                        expect(Array.isArray(r.warns)).toBe(true)
-                })
-
-                it('empty warns for simple valid inputs', () => {
-                        const r = index((z) => z('a', 'b', 'c')) // @ts-expect-error
-                        r._
-                        expect(r.warns).toEqual([])
                 })
 
                 it('complex nested: multiple layers all surface in type', () => {

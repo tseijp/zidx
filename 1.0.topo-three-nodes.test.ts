@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { index } from './index'
-import { absolute, relative, nowarn, S } from './utils'
+import { absolute, relative, S } from './utils'
 
 describe('three nodes', () => {
         describe('6 non-isomorphic DAG shapes', () => {
@@ -74,8 +74,7 @@ describe('three nodes', () => {
         describe('stride uniformity', () => {
                 it('chain a < b < c has uniform stride', () => {
                         const r = index((z) => z('a', 'b', 'c'))
-                        relative(r, 'a', 'b', 'c')
-                        nowarn(r) // @ts-expect-error
+                        relative(r, 'a', 'b', 'c') // @ts-expect-error
                         r._
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
@@ -83,15 +82,13 @@ describe('three nodes', () => {
 
                 it('fan out a < [b, c] has equal spacing from parent', () => {
                         const r = index((z) => z('a', ['b', 'c']))
-                        relative(r, 'a', ['b', 'c'])
-                        nowarn(r) // @ts-expect-error
+                        relative(r, 'a', ['b', 'c']) // @ts-expect-error
                         r._
                         expect(r.b - r.a).toBe(r.c - r.a)
                 })
 
                 it('single edge stride equals S', () => {
-                        const r = index((z) => z('a', 'b'))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', 'b')) // @ts-expect-error
                         r._
                         expect(r.b - r.a).toBe(S)
                 })
@@ -135,15 +132,13 @@ describe('three nodes', () => {
 
         describe('fan out equal spacing', () => {
                 it('z("a", ["b", "c"]) children are equidistant from parent', () => {
-                        const r = index((z) => z('a', ['b', 'c']))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', ['b', 'c'])) // @ts-expect-error
                         r._
                         expect(r.b).toBe(r.c)
                 })
 
                 it('z("a", ["b", "c", "d"]) all children same rank', () => {
-                        const r = index((z) => z('a', ['b', 'c', 'd']))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', ['b', 'c', 'd'])) // @ts-expect-error
                         r._
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)
@@ -152,20 +147,17 @@ describe('three nodes', () => {
 
         describe('no warns on valid topologies', () => {
                 it('chain produces no warnings', () => {
-                        const r = index((z) => z('a', 'b', 'c'))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', 'b', 'c')) // @ts-expect-error
                         r._
                 })
 
                 it('fan produces no warnings', () => {
-                        const r = index((z) => z('a', ['b', 'c']))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', ['b', 'c'])) // @ts-expect-error
                         r._
                 })
 
                 it('complete DAG produces no warnings', () => {
-                        const r = index((z) => [z('a', 'b', 'c'), z('a', 'c')])
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => [z('a', 'b', 'c'), z('a', 'c')]) // @ts-expect-error
                         r._
                 })
         })

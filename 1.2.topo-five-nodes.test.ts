@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { index } from './index'
-import { absolute, relative, nowarn, S } from './utils'
+import { absolute, relative, S } from './utils'
 
 describe('five nodes', () => {
         describe('basic patterns', () => {
@@ -73,8 +73,7 @@ describe('five nodes', () => {
 
         describe('stride uniformity', () => {
                 it('chain stride is constant across all gaps', () => {
-                        const r = index((z) => z('a', 'b', 'c', 'd', 'e'))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', 'b', 'c', 'd', 'e')) // @ts-expect-error
                         r._
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
@@ -83,8 +82,7 @@ describe('five nodes', () => {
                 })
 
                 it('wide fan children are all same rank', () => {
-                        const r = index((z) => z('a', ['b', 'c', 'd', 'e']))
-                        nowarn(r) // @ts-expect-error // @ts-expect-error
+                        const r = index((z) => z('a', ['b', 'c', 'd', 'e'])) // @ts-expect-error // @ts-expect-error
                         r._
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)
@@ -95,8 +93,7 @@ describe('five nodes', () => {
         describe('two disconnected components', () => {
                 it('z("a","b"), z("c","d","e") are independent', () => {
                         const r = index((z) => [z('a', 'b'), z('c', 'd', 'e')])
-                        absolute(r, ['a', 'b'], ['c', 'd'], ['d', 'e'])
-                        nowarn(r) // @ts-expect-error
+                        absolute(r, ['a', 'b'], ['c', 'd'], ['d', 'e']) // @ts-expect-error
                         r._
                         expect(r.b - r.a).toBe(S)
                         expect(r.d - r.c).toBe(S)

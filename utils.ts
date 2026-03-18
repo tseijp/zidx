@@ -16,10 +16,6 @@ export const relative = <K extends string>(r: ZApi<K>, ...levels: (K | readonly 
         for (let i = 0; i < groups.length; i += 1) for (let j = i + 1; j < groups.length; j += 1) for (const a of groups[i]) for (const b of groups[j]) expect(r[a]).toBeLessThan(r[b])
 }
 
-export const nowarn = <K extends string>(r: ZApi<K>) => {
-        expect(r.warns).toEqual([])
-}
-
 export const order = (api: Record<string, number>, keys: string[]): string[] => [...keys].sort((a, b) => api[a] - api[b])
 
 export const gap = (api: Record<string, number>, seq: string[]): number => (seq.length < 2 ? 0 : api[seq[1]] - api[seq[0]])

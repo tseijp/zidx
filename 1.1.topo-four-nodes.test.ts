@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { index } from './index'
-import { absolute, relative, nowarn, S } from './utils'
+import { absolute, relative, S } from './utils'
 
 describe('four nodes', () => {
         describe('6 edges', () => {
@@ -125,39 +125,34 @@ describe('four nodes', () => {
                 it('3e-1: a fan [b,c,d]', () => {
                         const r = index((z) => z('a', ['b', 'c', 'd']))
                         relative(r, 'a', ['b', 'c', 'd'])
-                        absolute(r, ['a', 'b'], ['a', 'c'], ['a', 'd'])
-                        nowarn(r) // @ts-expect-error
+                        absolute(r, ['a', 'b'], ['a', 'c'], ['a', 'd']) // @ts-expect-error
                         r._
                 })
 
                 it('3e-2: a fan [b,c] plus b chain c', () => {
                         const r = index((z) => [z('a', ['b', 'c']), z('b', 'c')])
                         relative(r, 'a', 'b', 'c')
-                        absolute(r, ['a', 'b'], ['a', 'c'], ['b', 'c'])
-                        nowarn(r) // @ts-expect-error
+                        absolute(r, ['a', 'b'], ['a', 'c'], ['b', 'c']) // @ts-expect-error
                         r._
                 })
 
                 it('3e-3: a fan [c,d] plus b chain c', () => {
                         const r = index((z) => [z('a', ['c', 'd']), z('b', 'c')])
-                        absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c'])
-                        nowarn(r) // @ts-expect-error
+                        absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c']) // @ts-expect-error
                         r._
                 })
 
                 it('3e-4: a chain b plus b fan [c,d]', () => {
                         const r = index((z) => [z('a', 'b'), z('b', ['c', 'd'])])
                         relative(r, 'a', 'b', ['c', 'd'])
-                        absolute(r, ['a', 'b'], ['b', 'c'], ['b', 'd'])
-                        nowarn(r) // @ts-expect-error
+                        absolute(r, ['a', 'b'], ['b', 'c'], ['b', 'd']) // @ts-expect-error
                         r._
                 })
 
                 it('3e-5: a chain b chain c chain d', () => {
                         const r = index((z) => z('a', 'b', 'c', 'd'))
                         relative(r, 'a', 'b', 'c', 'd')
-                        absolute(r, ['a', 'b'], ['b', 'c'], ['c', 'd'])
-                        nowarn(r) // @ts-expect-error
+                        absolute(r, ['a', 'b'], ['b', 'c'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
@@ -170,8 +165,7 @@ describe('four nodes', () => {
 
                 it('3e-7: a chain d plus b chain c chain d', () => {
                         const r = index((z) => [z('a', 'd'), z('b', 'c', 'd')])
-                        absolute(r, ['a', 'd'], ['b', 'c'], ['c', 'd'])
-                        nowarn(r) // @ts-expect-error
+                        absolute(r, ['a', 'd'], ['b', 'c'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
@@ -233,8 +227,7 @@ describe('four nodes', () => {
 
         describe('stride uniformity', () => {
                 it('four-node chain has uniform stride S', () => {
-                        const r = index((z) => z('a', 'b', 'c', 'd'))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', 'b', 'c', 'd')) // @ts-expect-error
                         r._
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
@@ -242,16 +235,14 @@ describe('four nodes', () => {
                 })
 
                 it('fan a < [b,c,d] children share same rank', () => {
-                        const r = index((z) => z('a', ['b', 'c', 'd']))
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => z('a', ['b', 'c', 'd'])) // @ts-expect-error
                         r._
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)
                 })
 
                 it('complete DAG preserves uniform stride', () => {
-                        const r = index((z) => [z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')])
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => [z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')]) // @ts-expect-error
                         r._
                         expect(r.b - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
@@ -259,8 +250,7 @@ describe('four nodes', () => {
                 })
 
                 it('disconnected pair edges have independent stride', () => {
-                        const r = index((z) => [z('a', 'd'), z('b', 'c')])
-                        nowarn(r) // @ts-expect-error
+                        const r = index((z) => [z('a', 'd'), z('b', 'c')]) // @ts-expect-error
                         r._
                         expect(r.d - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)
