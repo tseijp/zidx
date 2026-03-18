@@ -38,7 +38,7 @@ describe('three nodes', () => {
                 })
         })
 
-        describe('nested TaggedPairs', () => {
+        describe('nested Edge', () => {
                 it('z("a", [z("b", "c")]) produces a < b < c', () => {
                         dag((z) => [z('a', [z('b', 'c')])])
                                 .relative('a', 'b', 'c')

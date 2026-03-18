@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { dag, index, S } from './utils'
 
-describe('TaggedPairs recursion', () => {
+describe('Edge recursion', () => {
         describe('simple tagged children', () => {
                 it('tagged child: chain=z("b","c"); z("a",[chain]) => a < b < c', () => {
                         dag((z) => {
