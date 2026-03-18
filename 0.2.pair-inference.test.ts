@@ -137,7 +137,7 @@ describe('type inference and edge cases', () => {
                         //     b --> e
                         //     c --> e
                         // ```
-                        // [a, c] < [b, f], [d, e]
+                        // [a, c] < [b, f] < [d, e]
                         const res = index((z) => [z('a', [[['b', 'c']], ['d', 'e'], 'f'])])
                         expect(res.c).toBeLessThan(res.d)
                 })
