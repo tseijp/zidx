@@ -1,10 +1,15 @@
 type Pair = readonly [string, string]
 type Edge<T extends readonly [unknown, ...unknown[]] = readonly [unknown, ...unknown[]]> = Pair[] & { [SYM]?: T }
 type Node = string | Edge<any> | readonly Node[] | ((...a: any[]) => any)
-type KeysOf<T> = T extends string ? T : T extends Edge<infer U> ? KeysOf<U> : T extends readonly (infer R)[] ? KeysOf<R> : never
-type Keys<P> = P extends Edge<infer U> ? KeysOf<U> : P extends readonly (infer R)[] ? Keys<R> : never
+type KeysOfTuple<T extends readonly unknown[]> = T extends readonly [infer H, ...infer Rest] ? NodeKeys<H> | KeysOfTuple<Rest> : never
+type NodeKeys<T> = T extends string ? T : T extends Edge<infer U> ? KeysOfTuple<U> : T extends readonly (infer R)[] ? NodeKeys<R> : never
+type Keys<P> = P extends Edge<infer U> ? KeysOfTuple<U> : P extends readonly unknown[] ? KeysOfTuple<P> : never
+type BuildOut = Edge<any> | readonly unknown[]
 type ZRes<K extends string> = { items: Record<K, number>; warns: string[] }
-type ZExt<K extends string> = <P extends readonly unknown[]>(build: (z: ZFun) => P) => ZApi<K | Keys<P>>
+type ZExt<K extends string> = {
+        <P extends readonly unknown[]>(build: (z: ZFun) => P): ZApi<K | Keys<P>>
+        <T extends readonly [Node, Node, ...Node[]]>(build: (z: ZFun) => Edge<T>): ZApi<K | Keys<Edge<T>>>
+}
 type ZApi<K extends string> = ZExt<K> & Record<K, number> & { warns: string[] }
 type ZFun = { <C extends readonly [Node, ...Node[]], A extends string>(lower: A, children: readonly [...C]): Edge<[A, ...C]>; <T extends readonly [Node, Node, ...Node[]]>(...keys: T): Edge<T> }
 const SYM = Symbol('pack')
@@ -16,6 +21,7 @@ const { max, min, floor } = Math
 const clamp = (x: number, a: number, b: number) => min(max(x, a), b)
 const edge = <T extends readonly [unknown, ...unknown[]]>(p: Pair[]) => (((p as any)[SYM] = true), p as Edge<T>)
 const isEdge = (v: unknown): v is Edge => Array.isArray(v) && !!(v as any)[SYM]
+const pack = (v: unknown): readonly unknown[] => (isEdge(v) ? [v] : Array.isArray(v) ? v : [v])
 const sources = (ps: Pair[]) => {
         const d = new Map<string, number>()
         for (const [a, b] of ps) {
@@ -168,17 +174,20 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
         return { items: items as Record<K, number>, warns }
 }
 const api = <K extends string>({ items, warns }: ZRes<K>): ZApi<K> => {
-        const ext = <P extends readonly unknown[]>(build: (z: ZFun) => P) => {
+        const impl = (build: (z: ZFun) => BuildOut) => {
                 const pairs: Pair[] = []
-                for (const v of build(z)) collect(v, pairs)
-                const next = assign<K | Keys<P>>(pairs, items as Record<K | Keys<P>, number>)
-                return api<K | Keys<P>>({ items: next.items, warns: [...warns, ...next.warns] })
+                for (const v of pack(build(z))) collect(v, pairs)
+                const next = assign(pairs, items as Record<string, number>)
+                return api<any>({ items: next.items as Record<any, number>, warns: [...warns, ...next.warns] })
         }
+        const ext = impl as ZExt<K>
         return Object.assign(ext, { ...items, warns })
 }
-export function index<P extends readonly unknown[]>(build: (z: ZFun) => P): ZApi<Keys<P>> {
+export function index<P extends readonly unknown[]>(build: (z: ZFun) => P): ZApi<Keys<P>>
+export function index<T extends readonly [Node, Node, ...Node[]]>(build: (z: ZFun) => Edge<T>): ZApi<Keys<Edge<T>>>
+export function index(build: (z: ZFun) => BuildOut) {
         const pairs: Pair[] = []
-        for (const v of build(z)) collect(v, pairs)
-        return api<Keys<P>>(assign<Keys<P>>(pairs))
+        for (const v of pack(build(z))) collect(v, pairs)
+        return api(assign(pairs))
 }
 export default index

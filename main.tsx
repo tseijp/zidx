@@ -28,7 +28,7 @@ const toTree = (input: React.ReactNode): NodeTree[] => {
         }
         return items
 }
-const runtime: { render?: (lang: 'en' | 'ja') => void } = {}
+const runtime: { render?: (lang: 'en' | 'ja') => void; currentLang: 'en' | 'ja' } = { currentLang: 'en' }
 const NavNode = (_: NodeProps) => null
 const menuTree = toTree(
         <>
@@ -117,9 +117,12 @@ const PanelList = ({ items, drill }: { items: NodeTree[]; drill: (node: NodeTree
 )
 const MenuPlayground = ({ next }: { next: Record<string, number> }) => {
         const [path, setPath] = React.useState<string[]>([])
+        const [lang, setLang] = React.useState<'en' | 'ja'>(runtime.currentLang)
         const openRoot = (id: string) => setPath([id])
         const close = (depth: number) => setPath((prev) => prev.slice(0, depth))
         const drill = (depth: number, node: NodeTree) => {
+                if (node.id === 'lang-en') setLang('en')
+                else if (node.id === 'lang-ja') setLang('ja')
                 if (node.action) node.action()
                 if (node.href) {
                         if (node.href.startsWith('#')) {
@@ -151,7 +154,7 @@ const MenuPlayground = ({ next }: { next: Record<string, number> }) => {
                         <div className="flex p-x gap-x items-center wrap bg-white rounded-2x shadow-md" style={{ zIndex: next['menu bar'] }}>
                                 {menuTree.map((item) => (
                                         <button key={item.id} className="p-yx bg-chip rounded-x shadow-inset text-ink font-bold cursor" onClick={() => openRoot(item.id)}>
-                                                {item.label}
+                                                {item.id === 'docs' ? (lang === 'ja' ? 'Ja' : 'En') : item.label}
                                         </button>
                                 ))}
                                 <a href="https://github.com/tseijp/z-idx" className="ml-auto mr-x text-onyx font-bold tracking" style={{ zIndex: next['Github'] }} target="_blank" rel="noreferrer">
@@ -233,8 +236,11 @@ const App = () => {
                 setCharts(Array.from(ref.current.querySelectorAll('.mermaid-block')) as HTMLElement[])
         }
         React.useEffect(() => {
-                renderDoc(htmlEn)
-                runtime.render = (lang) => renderDoc(lang === 'ja' ? htmlJa : htmlEn)
+                runtime.render = (lang: 'en' | 'ja') => {
+                        runtime.currentLang = lang
+                        renderDoc(lang === 'ja' ? htmlJa : htmlEn)
+                }
+                runtime.render('en')
                 return () => {
                         runtime.render = undefined
                 }
@@ -259,3 +265,7 @@ createRoot(document.getElementById('app')!).render(<App />)
 
 // @ts-ignore
 window.index = index
+
+const ng = index((z) => z('a', 'b', 'c'))
+
+const ok = index((z) => [z('a', 'b', 'c')])
