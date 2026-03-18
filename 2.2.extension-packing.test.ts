@@ -124,7 +124,14 @@ describe('extension packing and boundaries', () => {
         })
 
         describe('extension below minimum stays positive', () => {
-                it.skip('deep below-minimum extensions should produce positive z-index', () => {
+                it('deep below-minimum extensions should produce positive z-index', () => {
+                        // AssertionError: expected false to be true // Object.is equality
+
+                        // - Expected
+                        // + Received
+
+                        // - true
+                        // + false
                         const base = index((z) => [z('a', 'b')])
                         const e1 = base((z) => [z('x1', 'a')])
                         const e2 = e1((z) => [z('x2', 'x1')])

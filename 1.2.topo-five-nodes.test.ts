@@ -15,7 +15,7 @@ describe('five nodes', () => {
                                 .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'])
                 })
 
-                it.skip('funnel: [a,b,c,d] < e', () => {
+                it('funnel: [a,b,c,d] < e', () => {
                         dag((z) => [z(['a', 'b', 'c', 'd'], 'e')])
                                 .relative(['a', 'b', 'c', 'd'], 'e')
                                 .absolute(['a', 'e'], ['b', 'e'], ['c', 'e'], ['d', 'e'])

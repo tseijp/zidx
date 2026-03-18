@@ -74,7 +74,8 @@ describe('TaggedPairs recursion', () => {
                         expect(r.d).toBeLessThan(r.f)
                 })
 
-                it.skip('chain + tagged branch: f < g and g < c', () => {
+                it('chain + tagged branch: f < g and g < c', () => {
+                        // AssertionError: expected 4096 to be less than 3072
                         const r = dag((z) => [z('a', 'b', 'c'), z('b', [z('d', ['e', 'f']), 'g'])]).raw
                         expect(r.f).toBeLessThan(r.g)
                         expect(r.g).toBeLessThan(r.c)
@@ -101,8 +102,10 @@ describe('TaggedPairs recursion', () => {
         })
 
         describe('reusing index result as tagged child', () => {
-                it.skip('branch=index(z=>[z("b","c")]); index(z=>[z("a",[branch])])', () => {
+                it('branch=index(z=>[z("b","c")]); index(z=>[z("a",[branch])])', () => {
+                        // Error: invalid node
                         const branch = index((z) => [z('b', 'c')])
+                        // @ts-ignore @TODO FIX: Type instantiation is excessively deep and possibly infinite.
                         const res = index((z) => [z('a', [branch])])
                         expect(res.a).toBeLessThan(res.b)
                         expect(res.b).toBeLessThan(res.c)

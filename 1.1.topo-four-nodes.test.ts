@@ -23,7 +23,7 @@ describe('four nodes', () => {
                                 .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['c', 'd'])
                 })
 
-                it.skip('5e-3: a fan to [b,c,d] plus [b,c] < d', () => {
+                it('5e-3: a fan to [b,c,d] plus [b,c] < d', () => {
                         dag((z) => [z('a', ['b', 'c', 'd']), z(['b', 'c'], 'd')])
                                 .relative('a', ['b', 'c'], 'd')
                                 .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'd'], ['c', 'd'])
@@ -35,7 +35,7 @@ describe('four nodes', () => {
                                 .absolute(['a', 'b'], ['a', 'c'], ['b', 'c'], ['b', 'd'], ['c', 'd'])
                 })
 
-                it.skip('5e-5: a chain b fan [c,d] plus [a,c] < d', () => {
+                it('5e-5: a chain b fan [c,d] plus [a,c] < d', () => {
                         dag((z) => [z('a', 'b', ['c', 'd']), z(['a', 'c'], 'd')])
                                 .relative('a', 'b', 'c', 'd')
                                 .absolute(['a', 'b'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'])
@@ -85,13 +85,13 @@ describe('four nodes', () => {
                                 .absolute(['a', 'c'], ['a', 'd'], ['b', 'c'], ['c', 'd'])
                 })
 
-                it.skip('4e-7: a fan [b,c] plus [b,c] < d', () => {
+                it('4e-7: a fan [b,c] plus [b,c] < d', () => {
                         dag((z) => [z('a', ['b', 'c']), z(['b', 'c'], 'd')])
                                 .relative('a', ['b', 'c'], 'd')
                                 .absolute(['a', 'b'], ['a', 'c'], ['b', 'd'], ['c', 'd'])
                 })
 
-                it.skip('4e-8: a fan [c,d] plus [b,c] < d', () => {
+                it('4e-8: a fan [c,d] plus [b,c] < d', () => {
                         dag((z) => [z('a', ['c', 'd']), z(['b', 'c'], 'd')])
                                 .relative(['a', 'b'], 'c', 'd')
                                 .absolute(['a', 'c'], ['a', 'd'], ['b', 'd'], ['c', 'd'])
@@ -139,7 +139,7 @@ describe('four nodes', () => {
                                 .nowarn()
                 })
 
-                it.skip('3e-6: [a,b] chain c chain d', () => {
+                it('3e-6: [a,b] chain c chain d', () => {
                         dag((z) => [z(['a', 'b'], 'c', 'd')])
                                 .relative(['a', 'b'], 'c', 'd')
                                 .absolute(['a', 'c'], ['b', 'c'], ['c', 'd'])
@@ -151,7 +151,7 @@ describe('four nodes', () => {
                                 .nowarn()
                 })
 
-                it.skip('3e-8: [a,b,c] < d', () => {
+                it('3e-8: [a,b,c] < d', () => {
                         dag((z) => [z(['a', 'b', 'c'], 'd')])
                                 .relative(['a', 'b', 'c'], 'd')
                                 .absolute(['a', 'd'], ['b', 'd'], ['c', 'd'])
@@ -171,7 +171,7 @@ describe('four nodes', () => {
                                 .absolute(['a', 'b'], ['a', 'c'])
                 })
 
-                it.skip('2e-3: [a,b] < c (d unconstrained)', () => {
+                it('2e-3: [a,b] < c (d unconstrained)', () => {
                         dag((z) => [z(['a', 'b'], 'c')])
                                 .relative(['a', 'b'], 'c')
                                 .absolute(['a', 'c'], ['b', 'c'])
@@ -194,7 +194,7 @@ describe('four nodes', () => {
         })
 
         describe('0 edges', () => {
-                it.skip('0e-1: all same rank [a,b,c,d]', () => {
+                it('0e-1: all same rank [a,b,c,d]', () => {
                         dag((z) => [z(['a', 'b', 'c', 'd'])])
                                 .relative(['a', 'b', 'c', 'd'])
                                 .absolute()

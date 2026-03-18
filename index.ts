@@ -10,6 +10,8 @@ type ZApi<K extends string> = ZExt<K> & Record<K, number> & { warns: string[] }
 type ZPair = { <C extends readonly [Node, ...Node[]], A extends string>(lower: A, children: readonly [...C]): TaggedPairs<[A, ...C]>; <T extends readonly [Node, Node, ...Node[]]>(...keys: T): TaggedPairs<T> }
 const STEP = 1 << 10
 const START = STEP
+const FAN_FLAT_LIMIT = 4
+const GAP_WARN = STEP >> 4
 const isPair = (v: unknown): v is Pair => Array.isArray(v) && v.length === 2 && typeof v[0] === 'string' && typeof v[1] === 'string'
 const isPairs = (v: unknown): v is Pair[] => Array.isArray(v) && Array.isArray((v as any)[0]) && isPair((v as any)[0])
 const sources = (ps: Pair[]) => {
@@ -87,13 +89,16 @@ const topo = (pairs: Pair[], extras: string[]) => {
         if (order.length !== indeg.size) throw new Error('cycle')
         return { order, preds, succ: adj }
 }
-const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> = {} as any): ZRes<K> => {
+const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> = {}): ZRes<K> => {
         const { order, preds, succ } = topo(pairs, Object.keys(seeds))
         const lo: Record<string, number> = {}
         const hi: Record<string, number> = {}
         const depth: Record<string, number> = {}
+        const width: Record<number, number> = {}
+        const cursor: Record<number, number> = {}
         for (const n of order) depth[n] = 0
         for (const n of order) for (const v of succ.get(n) || []) depth[v] = Math.max(depth[v] || 0, (depth[n] || 0) + 1)
+        for (const n of order) width[depth[n]] = (width[depth[n]] || 0) + 1
         for (const n of order)
                 if (n in seeds) {
                         lo[n] = seeds[n]
@@ -122,14 +127,18 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
                 const hasL = l !== Number.NEGATIVE_INFINITY
                 const hasH = h !== Number.POSITIVE_INFINITY
                 let v: number
-                if (!hasL && !hasH) v = START + (depth[n] || 0) * STEP
-                else if (!hasH) v = (preds.get(n) || []).length ? l - 1 + STEP : hasL ? l : START
+                if (!hasL && !hasH) {
+                        const d = depth[n] || 0
+                        const spread = width[d] > FAN_FLAT_LIMIT ? Math.max(1, Math.floor(STEP / (width[d] + 1))) : 0
+                        const idx = (cursor[d] = (cursor[d] || 0) + 1)
+                        v = START + d * STEP + spread * idx
+                } else if (!hasH) v = (preds.get(n) || []).length ? l - 1 + STEP : hasL ? l : START
                 else if (!hasL) {
                         v = h + 1 - STEP
                         if (v < 0) v = 0
                 } else {
                         const gap = h - l
-                        if (gap <= 4) warns.push(`narrow gap ${n}`)
+                        if (gap <= GAP_WARN) warns.push(`narrow gap ${n}`)
                         v = l + Math.max(1, gap >> 1)
                 }
                 if (hasH && v >= h) v = h - 1

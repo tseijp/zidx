@@ -3,7 +3,7 @@ import { dag, index, S } from './utils'
 
 describe('three nodes', () => {
         describe('6 non-isomorphic DAG shapes', () => {
-                it.skip('pattern 1 - 0 edges: all same rank', () => {
+                it('pattern 1 - 0 edges: all same rank', () => {
                         dag((z) => [z(['a', 'b', 'c'])]).relative(['a', 'b', 'c'])
                 })
 
@@ -19,7 +19,7 @@ describe('three nodes', () => {
                                 .absolute(['a', 'b'], ['a', 'c'])
                 })
 
-                it.skip('pattern 4 - 2 edges fan in: [b, c] < a', () => {
+                it('pattern 4 - 2 edges fan in: [b, c] < a', () => {
                         dag((z) => [z(['b', 'c'], 'a')])
                                 .relative(['b', 'c'], 'a')
                                 .absolute(['b', 'a'], ['c', 'a'])

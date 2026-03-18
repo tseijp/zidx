@@ -110,7 +110,7 @@ describe('type inference and edge cases', () => {
                         expect(res.b).toBeLessThan(res.e)
                 })
 
-                it.skip('deep nested tagged: warns is empty (narrow gap f)', () => {
+                it('deep nested tagged: warns is empty (narrow gap f)', () => {
                         const res = index((z) => [z('a', [z('b', [z('c', 'd'), 'e']), z('f', ['g'])])])
                         expect(res.warns).toEqual([])
                 })
@@ -126,7 +126,8 @@ describe('type inference and edge cases', () => {
                         expect(res.a).toBeLessThan(res.f)
                 })
 
-                it.skip('flat + nested arrays: c < d ordering', () => {
+                it('flat + nested arrays: c < d ordering', () => {
+                        // AssertionError: expected 3072 to be less than 2048
                         const res = index((z) => [z('a', [[['b', 'c']], ['d', 'e'], 'f'])])
                         expect(res.c).toBeLessThan(res.d)
                 })
@@ -145,7 +146,7 @@ describe('type inference and edge cases', () => {
                         expect(next.f).toBeLessThan(next.g)
                 })
 
-                it.skip('extension seeds preserved: warns is empty (narrow gap)', () => {
+                it('extension seeds preserved: warns is empty (narrow gap)', () => {
                         const base = index((z) => [z('a', 'b', 'c')])
                         const next = base((z) => [z('b', ['d', 'e']), z('c', 'f', 'g')])
                         expect(next.warns).toEqual([])
@@ -171,7 +172,8 @@ describe('type inference and edge cases', () => {
                         expect(res.f).toBeLessThan(res.g)
                 })
 
-                it.skip('combined tagged + array + linear: g < h and h < c', () => {
+                it('combined tagged + array + linear: g < h and h < c', () => {
+                        // AssertionError: expected 5120 to be less than 3072
                         const res = index((z) => [z('a', ['b', 'c']), z('b', [z('d', ['e', z('f', 'g')]), 'h'])])
                         expect(res.g).toBeLessThan(res.h)
                         expect(res.h).toBeLessThan(res.c)
