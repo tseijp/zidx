@@ -28,26 +28,26 @@ const sources = (ps: Pair[]) => {
 const gather = (n: Node): EP => {
         if (typeof n === 'string') return { entries: [n], pairs: [] }
         if (typeof n === 'function') {
-                const ks = Object.keys(n as any).filter((k) => k !== 'warns')
-                const s = ks.sort((a, b) => ((n as any)[a] as number) - ((n as any)[b] as number))
+                const ks = Object.keys(n as any)
+                        .filter((k) => k !== 'warns')
+                        .sort((a, b) => ((n as any)[a] as number) - ((n as any)[b] as number))
                 const p: Pair[] = []
-                for (let i = 0; i < s.length - 1; i += 1) p.push([s[i], s[i + 1]])
-                return { entries: s, pairs: p }
+                for (let i = 0; i < ks.length - 1; i += 1) p.push([ks[i], ks[i + 1]])
+                return { entries: ks, pairs: p }
         }
         if (isTagged(n)) return { entries: sources(n as Pair[]), pairs: n as Pair[] }
         if (Array.isArray(n)) {
-                const parts: { e: string[]; p: Pair[]; nested: boolean }[] = []
-                for (const v of n as readonly Node[]) {
+                const parts = (n as readonly Node[]).map((v) => {
                         const g = gather(v)
-                        parts.push({ e: g.entries, p: g.pairs, nested: typeof v !== 'string' })
-                }
+                        return { e: g.entries, p: g.pairs, n: typeof v !== 'string' }
+                })
                 const entries: string[] = []
                 const pairs: Pair[] = []
-                for (const g of parts) {
-                        entries.push(...g.e)
-                        pairs.push(...g.p)
+                for (const p of parts) {
+                        entries.push(...p.e)
+                        pairs.push(...p.p)
                 }
-                for (let i = 0; i < parts.length - 1; i += 1) if (parts[i].nested && parts[i + 1].nested) for (const a of parts[i].e) for (const b of parts[i + 1].e) pairs.push([a, b])
+                for (let i = 0; i < parts.length - 1; i += 1) if (parts[i].n && parts[i + 1].n) for (const a of parts[i].e) for (const b of parts[i + 1].e) pairs.push([a, b])
                 return { entries, pairs }
         }
         throw new Error('invalid node')
@@ -112,14 +112,7 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
         for (const n of order) depth[n] = 0
         for (const n of order) for (const v of succ.get(n) || []) depth[v] = max(depth[v] || 0, (depth[n] || 0) + 1)
         for (const n of order) width[depth[n]] = (width[depth[n]] || 0) + 1
-        for (const n of order)
-                if (n in seeds) {
-                        lo[n] = seeds[n]
-                        hi[n] = seeds[n]
-                } else {
-                        lo[n] = Number.NEGATIVE_INFINITY
-                        hi[n] = Number.POSITIVE_INFINITY
-                }
+        for (const n of order) n in seeds ? ((lo[n] = seeds[n]), (hi[n] = seeds[n])) : ((lo[n] = Number.NEGATIVE_INFINITY), (hi[n] = Number.POSITIVE_INFINITY))
         for (const n of order) {
                 const base = n in seeds ? seeds[n] : lo[n]
                 if (base !== Number.NEGATIVE_INFINITY) for (const v of succ.get(n) || []) if (!(v in seeds)) lo[v] = max(lo[v], base + 1)
@@ -144,9 +137,8 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
                         const idx = (cursor[d] = (cursor[d] || 0) + 1)
                         v = START + d * STEP + spread * idx
                 } else if (!hasH) v = (preds.get(n) || []).length ? l - 1 + STEP : hasL ? l : START - STEP
-                else if (!hasL) {
-                        v = max(1, h >> 1)
-                } else {
+                else if (!hasL) v = max(1, (h + 1) >> 1)
+                else {
                         const gap = h - l
                         if (gap <= GAP_WARN) warns.push(`narrow gap ${n}`)
                         v = l + max(1, gap >> 1)
@@ -154,11 +146,6 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
                 if (hasH && v >= h) v = h - 1
                 if (hasL && v <= l) v = l + 1
                 items[n as K] = v
-        }
-        const minV = Math.min(...Object.values(items))
-        if (minV < 0) {
-                const shift = -minV + STEP
-                for (const k of Object.keys(items)) items[k as K] += shift
         }
         return { items: items as Record<K, number>, warns }
 }
