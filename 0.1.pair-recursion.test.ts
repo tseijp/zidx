@@ -112,12 +112,11 @@ describe('Edge recursion', () => {
 
         describe('reusing index result as tagged child', () => {
                 it('branch=index(z=>[z("b","c")]); index(z=>[z("a",[branch])])', () => {
-                        // Error: invalid node
                         const branch = index((z) => [z('b', 'c')])
                         const res = index((z) => [z('a', [branch])])
-                        // @ts-ignore @TODO FIX: Property 'b' does not exist on type 'ZApi<"a">'.
+                        // @ts-expect-error
+                        res._
                         expect(res.a).toBeLessThan(res.b)
-                        // @ts-ignore @TODO FIX: Property 'b', 'c' does not exist on type 'ZApi<"a">'.
                         expect(res.b).toBeLessThan(res.c)
                 })
         })
@@ -140,13 +139,7 @@ describe('Edge recursion', () => {
 
         describe('sequential tagged reuse', () => {
                 it('a=z("a","b"), b=z("b","c") combined ordering', () => {
-                        dag(
-                                index((z) => {
-                                        const ab = z('a', 'b')
-                                        const bc = z('b', 'c')
-                                        return [ab, bc]
-                                })
-                        )
+                        dag(index((z) => [z('a', 'b'), z('b', 'c')]))
                                 .relative('a', 'b', 'c')
                                 .nowarn()
                 })

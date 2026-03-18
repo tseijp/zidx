@@ -1,20 +1,31 @@
 type Pair = readonly [string, string]
+const SYM = Symbol('pack')
 type Edge<T extends readonly [unknown, ...unknown[]] = readonly [unknown, ...unknown[]]> = Pair[] & { [SYM]?: T }
 type Node = string | Edge<any> | readonly Node[] | ((...a: any[]) => any)
-type KeysOf<T> = T extends string ? T : T extends Edge<infer U> ? KeysOf<U> : T extends readonly (infer R)[] ? KeysOf<R> : never
-type Keys<P> = P extends Edge<infer U> ? KeysOf<U> : P extends readonly (infer R)[] ? Keys<R> : never
+type Builtin = keyof (() => void) | 'warns'
+// prettier-ignore
+type KeysOf<T> =
+        T extends string ? T :
+        T extends Edge<infer U> ? KeysOf<U> :
+        T extends readonly (infer R)[] ? KeysOf<R> :
+        T extends (...a: any[]) => any ? Exclude<keyof T, Builtin> :
+        never
+// prettier-ignore
+type Keys<P> =
+        P extends Edge<infer U> ? KeysOf<U> :
+        P extends readonly (infer R)[] ? Keys<R> :
+        never
 export type ZRes<K extends string> = { items: Record<K, number>; warns: string[] }
 export type ZExt<K extends string> = <const P extends readonly unknown[]>(build: (z: ZFun) => P) => ZApi<K | Keys<P>>
 export type ZApi<K extends string> = ZExt<K> & Record<K, number> & { warns: string[] }
 export type ZFun = { <const C extends readonly [Node, ...Node[]], A extends string>(lower: A, children: readonly [...C]): Edge<[A, ...C]>; <const T extends readonly [Node, Node, ...Node[]]>(...keys: T): Edge<T> }
-const SYM = Symbol('pack')
 const INF = 1 << 30
 const STEP = 1 << 10
 const START = STEP
 const GAP_WARN = STEP >> 4
 const { max, min, floor } = Math
 const clamp = (x: number, a: number, b: number) => min(max(x, a), b)
-const edge = <T extends readonly [unknown, ...unknown[]]>(p: Pair[]) => (((p as any)[SYM] = true), p as Edge<T>)
+const edge = (p: Pair[]) => (((p as any)[SYM] = true), p)
 const isEdge = (v: unknown): v is Edge => Array.isArray(v) && !!(v as any)[SYM]
 const sources = (ps: Pair[]) => {
         const d = new Map<string, number>()
@@ -53,13 +64,13 @@ const gather = (n: Node): { entries: string[]; pairs: Pair[] } => {
         }
         throw new Error('invalid node')
 }
-const z: ZFun = ((...args: readonly Node[]) => {
+const z = (...args: readonly Node[]): Edge => {
         const g = args.map(gather)
         const r: Pair[] = []
         for (const x of g) r.push(...x.pairs)
         for (let i = 0; i < g.length - 1; i += 1) for (const a of g[i].entries) for (const b of g[i + 1].entries) r.push([a, b])
         return edge(r)
-}) as ZFun
+}
 const collect = (v: unknown, out: Pair[]): void => {
         if (isEdge(v)) {
                 out.push(...(v as Pair[]))
@@ -170,7 +181,7 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
 const api = <K extends string>({ items, warns }: ZRes<K>): ZApi<K> => {
         const ext = <const P extends readonly unknown[]>(build: (z: ZFun) => P) => {
                 const pairs: Pair[] = []
-                collect(build(z), pairs)
+                collect(build(z as ZFun), pairs)
                 const next = assign<K | Keys<P>>(pairs, items as Record<K | Keys<P>, number>)
                 return api<K | Keys<P>>({ items: next.items, warns: [...warns, ...next.warns] })
         }
@@ -178,7 +189,7 @@ const api = <K extends string>({ items, warns }: ZRes<K>): ZApi<K> => {
 }
 export function index<const P extends readonly unknown[]>(build: (z: ZFun) => P): ZApi<Keys<P>> {
         const pairs: Pair[] = []
-        collect(build(z), pairs)
+        collect(build(z as ZFun), pairs)
         return api<Keys<P>>(assign<Keys<P>>(pairs))
 }
 export default index
