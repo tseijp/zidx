@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { index, S } from './utils'
+import { index } from './utils'
 
 describe('extension seed stability', () => {
         describe('identical builds', () => {

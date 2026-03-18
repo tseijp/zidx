@@ -103,7 +103,7 @@ describe('TaggedPairs recursion', () => {
         describe('reusing index result as tagged child', () => {
                 it.skip('branch=index(z=>[z("b","c")]); index(z=>[z("a",[branch])])', () => {
                         const branch = index((z) => [z('b', 'c')])
-                        const res = index((z) => [z('a', [branch as any])])
+                        const res = index((z) => [z('a', [branch])])
                         expect(res.a).toBeLessThan(res.b)
                         expect(res.b).toBeLessThan(res.c)
                 })

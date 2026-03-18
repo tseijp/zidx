@@ -81,18 +81,6 @@ describe('z function basic API', () => {
                 })
 
                 it('deeply nested array: z("a",[["b","c"],["d","e"],"f"])', () => {
-                        // Error: invalid pair
-                        //  ❯ flatten index.ts:65:15
-                        //      63|                 return
-                        //      64|         }
-                        //      65|         throw new Error('invalid pair')
-                        //        |               ^
-                        //      66| }
-                        //      67| const topo = (pairs: Pair[], extras: string[]) => {
-                        //  ❯ flatten index.ts:62:40
-                        //  ❯ index index.ts:188:41
-                        //  ❯ dag utils.ts:13:19
-                        //  ❯ 0.0.pair-basics.test.ts:84:25
                         dag((z) => [z('a', [['b', 'c'], ['d', 'e'], 'f'])])
                                 .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'], ['a', 'f'])
                                 .nowarn()
@@ -131,21 +119,6 @@ describe('z function basic API', () => {
                 })
 
                 it('separate chains have independent ordering', () => {
-                        // AssertionError: expected 2048 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 2048
-
-                        //  ❯ 0.0.pair-basics.test.ts:123:43
-                        //     121|                 it('separate chains have independent ordering', () => {
-                        //     122|                         const r = dag((z) => [z('a', 'b'), z('c', 'd')]).nowarn()…
-                        //     123|                         expect(r.b - r.a).toBe(S)
-                        //        |                                           ^
-                        //     124|                         expect(r.d - r.c).toBe(S)
-                        //     125|                 })
                         const r = dag((z) => [z('a', 'b'), z('c', 'd')]).nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.d - r.c).toBe(S)

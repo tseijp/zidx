@@ -12,13 +12,6 @@ describe('four nodes', () => {
 
         describe('5 edges', () => {
                 it('5e-1: a fan to [b,c,d] plus b fan to [c,d]', () => {
-                        // AssertionError: expected 2048 to be 3072 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 3072
-                        // + 2048
                         dag((z) => [z('a', ['b', 'c', 'd']), z('b', ['c', 'd'])])
                                 .relative('a', 'b', ['c', 'd'])
                                 .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'])
@@ -37,7 +30,6 @@ describe('four nodes', () => {
                 })
 
                 it('5e-4: a chain b fan [c,d] plus a chain c chain d', () => {
-                        // Error: linear keys must be strings
                         dag((z) => [z('a', 'b', ['c', 'd']), z('a', 'c', 'd')])
                                 .relative('a', 'b', 'c', 'd')
                                 .absolute(['a', 'b'], ['a', 'c'], ['b', 'c'], ['b', 'd'], ['c', 'd'])
@@ -50,13 +42,6 @@ describe('four nodes', () => {
                 })
 
                 it('5e-6: a fan [c,d] plus b fan [c,d] plus c chain d', () => {
-                        // AssertionError: expected +0 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 0
                         dag((z) => [z('a', ['c', 'd']), z('b', ['c', 'd']), z('c', 'd')])
                                 .relative(['a', 'b'], 'c', 'd')
                                 .absolute(['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'])
@@ -65,39 +50,18 @@ describe('four nodes', () => {
 
         describe('4 edges', () => {
                 it('4e-1: a fan [b,c,d] plus b chain c', () => {
-                        // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 2048
-                        // + 1024
                         dag((z) => [z('a', ['b', 'c', 'd']), z('b', 'c')])
                                 .relative('a', ['b', 'd'], 'c')
                                 .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'])
                 })
 
                 it('4e-2: a fan [b,c] plus b fan [c,d]', () => {
-                        // AssertionError: expected 2048 to be 3072 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 3072
-                        // + 2048
                         dag((z) => [z('a', ['b', 'c']), z('b', ['c', 'd'])])
                                 .relative('a', 'b', ['c', 'd'])
                                 .absolute(['a', 'b'], ['a', 'c'], ['b', 'c'], ['b', 'd'])
                 })
 
                 it('4e-3: a fan [c,d] plus b fan [c,d]', () => {
-                        // AssertionError: expected +0 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 0
                         dag((z) => [z('a', ['c', 'd']), z('b', ['c', 'd'])])
                                 .relative(['a', 'b'], ['c', 'd'])
                                 .absolute(['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'])
@@ -116,13 +80,6 @@ describe('four nodes', () => {
                 })
 
                 it('4e-6: a fan [c,d] plus b chain c chain d', () => {
-                        // AssertionError: expected +0 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 0
                         dag((z) => [z('a', ['c', 'd']), z('b', 'c', 'd')])
                                 .relative(['a', 'b'], 'c', 'd')
                                 .absolute(['a', 'c'], ['a', 'd'], ['b', 'c'], ['c', 'd'])
@@ -149,13 +106,6 @@ describe('four nodes', () => {
 
         describe('3 edges', () => {
                 it('3e-1: a fan [b,c,d]', () => {
-                        // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 2048
-                        // + 1024
                         dag((z) => [z('a', ['b', 'c', 'd'])])
                                 .relative('a', ['b', 'c', 'd'])
                                 .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'])
@@ -176,13 +126,6 @@ describe('four nodes', () => {
                 })
 
                 it('3e-4: a chain b plus b fan [c,d]', () => {
-                        // AssertionError: expected 2048 to be 3072 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 3072
-                        // + 2048
                         dag((z) => [z('a', 'b'), z('b', ['c', 'd'])])
                                 .relative('a', 'b', ['c', 'd'])
                                 .absolute(['a', 'b'], ['b', 'c'], ['b', 'd'])
@@ -223,13 +166,6 @@ describe('four nodes', () => {
                 })
 
                 it('2e-2: fan a < [b,c] (d unconstrained)', () => {
-                        // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 2048
-                        // + 1024
                         dag((z) => [z('a', ['b', 'c'])])
                                 .relative('a', ['b', 'c'])
                                 .absolute(['a', 'b'], ['a', 'c'])
@@ -242,13 +178,6 @@ describe('four nodes', () => {
                 })
 
                 it('2e-4: two disconnected edges a < d and b < c', () => {
-                        // AssertionError: expected +0 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 0
                         dag((z) => [z('a', 'd'), z('b', 'c')])
                                 .relative(['a', 'b'], ['c', 'd'])
                                 .absolute(['a', 'd'], ['b', 'c'])
@@ -257,13 +186,21 @@ describe('four nodes', () => {
 
         describe('1 edge', () => {
                 it('1e-1: single edge a < b (c,d unconstrained)', () => {
-                        // AssertionError: expected +0 to be 1024 // Object.is equality
+                        // AssertionError: expected 1024 to be 2048 // Object.is equality
 
                         // - Expected
                         // + Received
 
-                        // - 1024
-                        // + 0
+                        // - 2048
+                        // + 1024
+
+                        //  ❯ Object.relative utils.ts:18:103
+                        //      16|                 relative(...levels: Level[]) {
+                        //      17|                         const groups = levels.map(pack)
+                        //      18|                         for (const g of groups) for (let i = 1; i < g.length; i +…
+                        //        |                                                                                                       ^
+                        //      19|                         for (let i = 0; i < groups.length; i += 1) for (let j = i…
+                        //      20|                         return self
                         dag((z) => [z('a', 'b')])
                                 .relative(['a', 'b', 'c'], 'b')
                                 .absolute(['a', 'b'])
@@ -288,13 +225,6 @@ describe('four nodes', () => {
                 })
 
                 it('fan a < [b,c,d] children share same rank', () => {
-                        // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 2048
-                        // + 1024
                         const r = dag((z) => [z('a', ['b', 'c', 'd'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)
@@ -308,13 +238,6 @@ describe('four nodes', () => {
                 })
 
                 it('disconnected pair edges have independent stride', () => {
-                        // AssertionError: expected 2048 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 2048
                         const r = dag((z) => [z('a', 'd'), z('b', 'c')]).nowarn().raw
                         expect(r.d - r.a).toBe(S)
                         expect(r.c - r.b).toBe(S)

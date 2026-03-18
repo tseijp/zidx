@@ -14,13 +14,6 @@ describe('three nodes', () => {
                 })
 
                 it('pattern 3 - 2 edges fan out: a < [b, c]', () => {
-                        // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 2048
-                        // + 1024
                         dag((z) => [z('a', ['b', 'c'])])
                                 .relative('a', ['b', 'c'])
                                 .absolute(['a', 'b'], ['a', 'c'])
@@ -77,13 +70,6 @@ describe('three nodes', () => {
                 })
 
                 it('fan out a < [b, c] has equal spacing from parent', () => {
-                        // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 2048
-                        // + 1024
                         const r = dag((z) => [z('a', ['b', 'c'])])
                                 .relative('a', ['b', 'c'])
                                 .nowarn().raw
@@ -131,26 +117,12 @@ describe('three nodes', () => {
         })
 
         describe('fan out equal spacing', () => {
-                // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                // - Expected
-                // + Received
-
-                // - 2048
-                // + 1024
                 it('z("a", ["b", "c"]) children are equidistant from parent', () => {
                         const r = dag((z) => [z('a', ['b', 'c'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                 })
 
                 it('z("a", ["b", "c", "d"]) all children same rank', () => {
-                        // AssertionError: expected 1024 to be 2048 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 2048
-                        // + 1024
                         const r = dag((z) => [z('a', ['b', 'c', 'd'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)

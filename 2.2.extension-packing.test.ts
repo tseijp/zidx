@@ -138,26 +138,12 @@ describe('extension packing and boundaries', () => {
 
         describe('exterior insertion uses step-sized gaps', () => {
                 it('below insertion uses step-sized spacing', () => {
-                        // AssertionError: expected 513 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 513
                         const base = index((z) => [z('a', 'b')])
                         const next = base((z) => [z('d', 'a')])
                         expect(next.a - next.d).toBe(S)
                 })
 
                 it('above insertion uses step-sized spacing', () => {
-                        // AssertionError: expected 512 to be 1024 // Object.is equality
-
-                        // - Expected
-                        // + Received
-
-                        // - 1024
-                        // + 512
                         const base = index((z) => [z('a', 'b')])
                         const next = base((z) => [z('b', 'e')])
                         expect(next.e - next.b).toBe(S)
@@ -215,6 +201,14 @@ describe('extension packing and boundaries', () => {
 
         describe('large fan then dense extension', () => {
                 it('large fan base with dense extension in one gap', () => {
+                        // AssertionError: expected 2052 to be less than 2048
+                        //  ❯ 2.2.extension-packing.test.ts:209:40
+                        //     207|                         expect(ext.x1).toBeLessThan(ext.x2)
+                        //     208|                         expect(ext.x2).toBeLessThan(ext.x3)
+                        //     209|                         expect(ext.x3).toBeLessThan(base.c)
+                        //        |                                        ^
+                        //     210|                 })
+                        //     211|         })
                         const base = index((z) => [z('a', ['b', 'c', 'd', 'e', 'f'])])
                         const ext = base((z) => [z('b', 'x1', 'x2', 'x3', 'c')])
                         expect(base.b).toBeLessThan(ext.x1)
