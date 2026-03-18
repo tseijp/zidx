@@ -113,14 +113,24 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
         for (const n of order) depth[n] = 0
         for (const n of order) for (const v of succ.get(n) || []) depth[v] = max(depth[v] || 0, (depth[n] || 0) + 1)
         for (const n of order) width[depth[n]] = (width[depth[n]] || 0) + 1
-        for (const n of order) n in seeds ? ((lo[n] = seeds[n]), (hi[n] = seeds[n])) : ((lo[n] = -INF), (hi[n] = INF))
         for (const n of order) {
-                const base = n in seeds ? seeds[n] : lo[n]
+                if (n in seeds) {
+                        lo[n] = seeds[n]
+                        hi[n] = seeds[n]
+                        continue
+                }
+                lo[n] = -INF
+                hi[n] = INF
+        }
+        for (const n of order) {
+                let base = lo[n]
+                if (n in seeds) base = seeds[n]
                 if (base !== -INF) for (const v of succ.get(n) || []) if (!(v in seeds)) lo[v] = max(lo[v], base + 1)
         }
         for (let i = order.length - 1; i >= 0; i -= 1) {
                 const n = order[i]
-                const base = n in seeds ? seeds[n] : hi[n]
+                let base = hi[n]
+                if (n in seeds) base = seeds[n]
                 if (base !== INF) for (const p of preds.get(n) || []) if (!(p in seeds)) hi[p] = min(hi[p], base - 1)
         }
         const warns: string[] = []
@@ -134,11 +144,16 @@ const assign = <K extends string>(pairs: Pair[], seeds: Record<string, number> =
                 let v: number
                 if (!hasL && !hasH) {
                         const d = depth[n] || 0
-                        const spread = width[d] > 4 ? max(1, floor(STEP / (width[d] + 1))) : 0
+                        let spread = 0
+                        if (width[d] > 4) spread = max(1, floor(STEP / (width[d] + 1)))
                         const idx = (cursor[d] = (cursor[d] || 0) + 1)
                         v = START + d * STEP + spread * idx
-                } else if (!hasH) v = (preds.get(n) || []).length ? l - 1 + STEP : hasL ? l : START - STEP
-                else if (!hasL) v = max(1, (h + 1) >> 1)
+                } else if (!hasH) {
+                        const hasPred = (preds.get(n) || []).length > 0
+                        if (hasPred) v = l - 1 + STEP
+                        else if (hasL) v = l
+                        else v = START - STEP
+                } else if (!hasL) v = max(1, (h + 1) >> 1)
                 else {
                         const gap = h - l
                         if (gap <= GAP_WARN) warns.push(`narrow gap ${n}`)
