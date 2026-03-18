@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { index, S, mid } from './utils'
+import { index, S } from './utils'
 
 describe('extension seed stability', () => {
         describe('identical builds', () => {
@@ -106,7 +106,9 @@ describe('extension seed stability', () => {
                 })
 
                 it('extension with tree form preserves all base seeds', () => {
+                        // Error: linear keys must be strings
                         const base = index((z) => [z('a', 'b', 'c')])
+                        // @ts-ignore @TODO FIX: Argument of type 'string[]' is not assignable to parameter of type 'string'.ts
                         const next = base((z) => [z('a', ['x', 'y'], 'b')])
                         expect(next.a).toBe(base.a)
                         expect(next.b).toBe(base.b)

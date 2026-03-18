@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { index, S, mid } from './utils'
+import { index, mid } from './utils'
 
 describe('extension density and gap shrinkage', () => {
         describe('single midpoint insertion', () => {

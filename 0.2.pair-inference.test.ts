@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
-import { dag, index, S } from './utils'
+import { index } from './utils'
 
 describe('type inference and edge cases', () => {
         describe('expectTypeOf linear chain', () => {

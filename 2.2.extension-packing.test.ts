@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { index, S, mid } from './utils'
+import { index, S } from './utils'
 
 describe('extension packing and boundaries', () => {
         describe('exterior insertions', () => {
@@ -138,12 +138,26 @@ describe('extension packing and boundaries', () => {
 
         describe('exterior insertion uses step-sized gaps', () => {
                 it('below insertion uses step-sized spacing', () => {
+                        // AssertionError: expected 513 to be 1024 // Object.is equality
+
+                        // - Expected
+                        // + Received
+
+                        // - 1024
+                        // + 513
                         const base = index((z) => [z('a', 'b')])
                         const next = base((z) => [z('d', 'a')])
                         expect(next.a - next.d).toBe(S)
                 })
 
                 it('above insertion uses step-sized spacing', () => {
+                        // AssertionError: expected 512 to be 1024 // Object.is equality
+
+                        // - Expected
+                        // + Received
+
+                        // - 1024
+                        // + 512
                         const base = index((z) => [z('a', 'b')])
                         const next = base((z) => [z('b', 'e')])
                         expect(next.e - next.b).toBe(S)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dag, index, S } from './utils'
+import { dag, S } from './utils'
 
 describe('z function basic API', () => {
         describe('linear chains', () => {
@@ -52,37 +52,49 @@ describe('z function basic API', () => {
         describe('parent with array children', () => {
                 it('parent + 2 array children: a < b, a < c', () => {
                         dag((z) => [z('a', ['b', 'c'])])
-                                .edges(['a', 'b'], ['a', 'c'])
+                                .absolute(['a', 'b'], ['a', 'c'])
                                 .nowarn()
                 })
 
                 it('parent + 3 array children: a < b, a < c, a < d', () => {
                         dag((z) => [z('a', ['b', 'c', 'd'])])
-                                .edges(['a', 'b'], ['a', 'c'], ['a', 'd'])
+                                .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'])
                                 .nowarn()
                 })
 
                 it('parent + 4 array children: a < all', () => {
                         dag((z) => [z('a', ['b', 'c', 'd', 'e'])])
-                                .edges(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'])
+                                .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'])
                                 .nowarn()
                 })
 
                 it('reversed child order in array: a < c < b (declared order)', () => {
                         dag((z) => [z('a', ['c', 'b'])])
-                                .edges(['a', 'c'], ['a', 'b'])
+                                .absolute(['a', 'c'], ['a', 'b'])
                                 .nowarn()
                 })
 
                 it('nested arrays flattened: z("a",["b",["c","d"],"e"])', () => {
                         dag((z) => [z('a', ['b', ['c', 'd'], 'e'])])
-                                .edges(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'])
+                                .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'])
                                 .nowarn()
                 })
 
                 it('deeply nested array: z("a",[["b","c"],["d","e"],"f"])', () => {
+                        // Error: invalid pair
+                        //  ❯ flatten index.ts:65:15
+                        //      63|                 return
+                        //      64|         }
+                        //      65|         throw new Error('invalid pair')
+                        //        |               ^
+                        //      66| }
+                        //      67| const topo = (pairs: Pair[], extras: string[]) => {
+                        //  ❯ flatten index.ts:62:40
+                        //  ❯ index index.ts:188:41
+                        //  ❯ dag utils.ts:13:19
+                        //  ❯ 0.0.pair-basics.test.ts:84:25
                         dag((z) => [z('a', [['b', 'c'], ['d', 'e'], 'f'])])
-                                .edges(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'], ['a', 'f'])
+                                .absolute(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e'], ['a', 'f'])
                                 .nowarn()
                 })
         })
@@ -90,7 +102,7 @@ describe('z function basic API', () => {
         describe('multiple z calls', () => {
                 it('mixed: chain + parent-array', () => {
                         dag((z) => [z('a', 'b', 'c'), z('b', ['d', 'e'])])
-                                .edges(['a', 'b'], ['b', 'c'], ['b', 'd'], ['b', 'e'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['b', 'd'], ['b', 'e'])
                                 .nowarn()
                 })
 
@@ -119,6 +131,21 @@ describe('z function basic API', () => {
                 })
 
                 it('separate chains have independent ordering', () => {
+                        // AssertionError: expected 2048 to be 1024 // Object.is equality
+
+                        // - Expected
+                        // + Received
+
+                        // - 1024
+                        // + 2048
+
+                        //  ❯ 0.0.pair-basics.test.ts:123:43
+                        //     121|                 it('separate chains have independent ordering', () => {
+                        //     122|                         const r = dag((z) => [z('a', 'b'), z('c', 'd')]).nowarn()…
+                        //     123|                         expect(r.b - r.a).toBe(S)
+                        //        |                                           ^
+                        //     124|                         expect(r.d - r.c).toBe(S)
+                        //     125|                 })
                         const r = dag((z) => [z('a', 'b'), z('c', 'd')]).nowarn().raw
                         expect(r.b - r.a).toBe(S)
                         expect(r.d - r.c).toBe(S)

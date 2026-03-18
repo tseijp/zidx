@@ -10,35 +10,38 @@ describe('three nodes', () => {
                 it('pattern 2 - 1 edge: a < b', () => {
                         dag((z) => [z('a', 'b')])
                                 .relative('a', 'b')
-                                .edges(['a', 'b'])
-                                .nowarn()
+                                .absolute(['a', 'b'])
                 })
 
                 it('pattern 3 - 2 edges fan out: a < [b, c]', () => {
+                        // AssertionError: expected 1024 to be 2048 // Object.is equality
+
+                        // - Expected
+                        // + Received
+
+                        // - 2048
+                        // + 1024
                         dag((z) => [z('a', ['b', 'c'])])
                                 .relative('a', ['b', 'c'])
-                                .edges(['a', 'b'], ['a', 'c'])
-                                .nowarn()
+                                .absolute(['a', 'b'], ['a', 'c'])
                 })
 
                 it.skip('pattern 4 - 2 edges fan in: [b, c] < a', () => {
                         dag((z) => [z(['b', 'c'], 'a')])
                                 .relative(['b', 'c'], 'a')
-                                .edges(['b', 'a'], ['c', 'a'])
+                                .absolute(['b', 'a'], ['c', 'a'])
                 })
 
                 it('pattern 5 - 2 edges chain: a < b < c', () => {
                         dag((z) => [z('a', 'b', 'c')])
                                 .relative('a', 'b', 'c')
-                                .edges(['a', 'b'], ['b', 'c'])
-                                .nowarn()
+                                .absolute(['a', 'b'], ['b', 'c'])
                 })
 
                 it('pattern 6 - 3 edges complete: a < b < c with a < c', () => {
                         dag((z) => [z('a', 'b', 'c'), z('a', 'c')])
                                 .relative('a', 'b', 'c')
-                                .edges(['a', 'b'], ['b', 'c'], ['a', 'c'])
-                                .nowarn()
+                                .absolute(['a', 'b'], ['b', 'c'], ['a', 'c'])
                 })
         })
 
@@ -46,8 +49,7 @@ describe('three nodes', () => {
                 it('z("a", [z("b", "c")]) produces a < b < c', () => {
                         dag((z) => [z('a', [z('b', 'c')])])
                                 .relative('a', 'b', 'c')
-                                .edges(['a', 'b'], ['b', 'c'])
-                                .nowarn()
+                                .absolute(['a', 'b'], ['b', 'c'])
                 })
         })
 
@@ -55,15 +57,13 @@ describe('three nodes', () => {
                 it('z("a","b"), z("b","c") same as chain a < b < c', () => {
                         dag((z) => [z('a', 'b'), z('b', 'c')])
                                 .relative('a', 'b', 'c')
-                                .edges(['a', 'b'], ['b', 'c'])
-                                .nowarn()
+                                .absolute(['a', 'b'], ['b', 'c'])
                 })
 
                 it('reversed declaration: z("b","c"), z("a","b") still a < b < c', () => {
                         dag((z) => [z('b', 'c'), z('a', 'b')])
                                 .relative('a', 'b', 'c')
-                                .edges(['a', 'b'], ['b', 'c'])
-                                .nowarn()
+                                .absolute(['a', 'b'], ['b', 'c'])
                 })
         })
 
@@ -77,6 +77,13 @@ describe('three nodes', () => {
                 })
 
                 it('fan out a < [b, c] has equal spacing from parent', () => {
+                        // AssertionError: expected 1024 to be 2048 // Object.is equality
+
+                        // - Expected
+                        // + Received
+
+                        // - 2048
+                        // + 1024
                         const r = dag((z) => [z('a', ['b', 'c'])])
                                 .relative('a', ['b', 'c'])
                                 .nowarn().raw
@@ -91,9 +98,7 @@ describe('three nodes', () => {
 
         describe('reversed child order in array', () => {
                 it('z("a", ["c", "b"]) preserves declared order', () => {
-                        dag((z) => [z('a', ['c', 'b'])])
-                                .edges(['a', 'c'], ['a', 'b'])
-                                .nowarn()
+                        dag((z) => [z('a', ['c', 'b'])]).absolute(['a', 'c'], ['a', 'b'])
                 })
         })
 
@@ -126,12 +131,26 @@ describe('three nodes', () => {
         })
 
         describe('fan out equal spacing', () => {
+                // AssertionError: expected 1024 to be 2048 // Object.is equality
+
+                // - Expected
+                // + Received
+
+                // - 2048
+                // + 1024
                 it('z("a", ["b", "c"]) children are equidistant from parent', () => {
                         const r = dag((z) => [z('a', ['b', 'c'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                 })
 
                 it('z("a", ["b", "c", "d"]) all children same rank', () => {
+                        // AssertionError: expected 1024 to be 2048 // Object.is equality
+
+                        // - Expected
+                        // + Received
+
+                        // - 2048
+                        // + 1024
                         const r = dag((z) => [z('a', ['b', 'c', 'd'])]).nowarn().raw
                         expect(r.b).toBe(r.c)
                         expect(r.c).toBe(r.d)

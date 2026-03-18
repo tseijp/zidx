@@ -17,7 +17,7 @@ describe('TaggedPairs recursion', () => {
                                 const chain = z('b', 'c', 'd')
                                 return [z('a', [chain, 'e'])]
                         })
-                                .edges(['a', 'b'], ['b', 'c'], ['c', 'd'], ['a', 'e'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['c', 'd'], ['a', 'e'])
                                 .nowarn()
                 })
 
@@ -27,7 +27,7 @@ describe('TaggedPairs recursion', () => {
                                 const right = z('d', 'e')
                                 return [z('a', [left, right])]
                         })
-                                .edges(['a', 'b'], ['b', 'c'], ['a', 'd'], ['d', 'e'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['a', 'd'], ['d', 'e'])
                                 .nowarn()
                 })
 
@@ -38,13 +38,13 @@ describe('TaggedPairs recursion', () => {
                                 const t3 = z('f', 'g')
                                 return [z('a', [t1, t2, t3])]
                         })
-                                .edges(['a', 'b'], ['b', 'c'], ['a', 'd'], ['d', 'e'], ['a', 'f'], ['f', 'g'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['a', 'd'], ['d', 'e'], ['a', 'f'], ['f', 'g'])
                                 .nowarn()
                 })
 
                 it('tagged + string siblings: z("a",[z("b","c"),"d","e"])', () => {
                         dag((z) => [z('a', [z('b', 'c'), 'd', 'e'])])
-                                .edges(['a', 'b'], ['b', 'c'], ['a', 'd'], ['a', 'e'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['a', 'd'], ['a', 'e'])
                                 .nowarn()
                 })
         })
@@ -66,7 +66,7 @@ describe('TaggedPairs recursion', () => {
         describe('chain then tagged branch', () => {
                 it('chain + tagged branch ordering', () => {
                         const r = dag((z) => [z('a', 'b', 'c'), z('b', [z('d', ['e', 'f']), 'g'])])
-                                .edges(['a', 'b'], ['b', 'c'], ['b', 'd'], ['d', 'e'], ['d', 'f'], ['b', 'g'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['b', 'd'], ['d', 'e'], ['d', 'f'], ['b', 'g'])
                                 .nowarn().raw
                         expect(r.a).toBeLessThan(r.b)
                         expect(r.b).toBeLessThan(r.d)
@@ -87,7 +87,7 @@ describe('TaggedPairs recursion', () => {
                                 const shared = z('c', 'd')
                                 return [z('a', [shared]), z('b', [shared])]
                         })
-                                .edges(['a', 'c'], ['b', 'c'], ['c', 'd'])
+                                .absolute(['a', 'c'], ['b', 'c'], ['c', 'd'])
                                 .nowarn()
                 })
         })
@@ -95,7 +95,7 @@ describe('TaggedPairs recursion', () => {
         describe('tagged pairs with array children', () => {
                 it('z("a",[z("b",["c","d"])])', () => {
                         dag((z) => [z('a', [z('b', ['c', 'd'])])])
-                                .edges(['a', 'b'], ['b', 'c'], ['b', 'd'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['b', 'd'])
                                 .nowarn()
                 })
         })
@@ -112,7 +112,7 @@ describe('TaggedPairs recursion', () => {
         describe('mixed tagged and string children', () => {
                 it('z("a",["b","c"]), z("b",[z("d","e"),"f"])', () => {
                         dag((z) => [z('a', ['b', 'c']), z('b', [z('d', 'e'), 'f'])])
-                                .edges(['a', 'b'], ['a', 'c'], ['b', 'd'], ['d', 'e'], ['b', 'f'])
+                                .absolute(['a', 'b'], ['a', 'c'], ['b', 'd'], ['d', 'e'], ['b', 'f'])
                                 .nowarn()
                 })
         })
@@ -120,7 +120,7 @@ describe('TaggedPairs recursion', () => {
         describe('two-level fan', () => {
                 it('z("a",[z("b",["c","d"]),z("e",["f","g"])])', () => {
                         dag((z) => [z('a', [z('b', ['c', 'd']), z('e', ['f', 'g'])])])
-                                .edges(['a', 'b'], ['b', 'c'], ['b', 'd'], ['a', 'e'], ['e', 'f'], ['e', 'g'])
+                                .absolute(['a', 'b'], ['b', 'c'], ['b', 'd'], ['a', 'e'], ['e', 'f'], ['e', 'g'])
                                 .nowarn()
                 })
         })
