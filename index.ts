@@ -1,192 +1,201 @@
-/**
- * Turn partial-order z-relations into numeric ranks;
- * preserve seeded keys while inserting newcomers via midpoint splits;
- * accept linear chains or tree shorthands and lift key names for inference.
- */
-type Pair = readonly [string, string]
-declare const ZTag: unique symbol
-type TaggedPairs<T extends readonly [unknown, ...unknown[]] = readonly [unknown, ...unknown[]]> = Pair[] & { [ZTag]?: T }
-type Node = string | TaggedPairs<any> | readonly Node[]
-type KeysOf<T> = T extends string ? T : T extends TaggedPairs<infer U> ? KeysOf<U> : T extends readonly (infer R)[] ? KeysOf<R> : never
-type Keys<P> = P extends TaggedPairs<infer U> ? KeysOf<U> : P extends readonly (infer R)[] ? Keys<R> : never
-type ZRes<K extends string> = { items: Record<K, number>; warns: string[] }
-type ZExt<K extends string> = <P extends readonly unknown[]>(build: (z: ZPair) => P) => ZApi<K | Keys<P>>
-type ZApi<K extends string> = ZExt<K> & Record<K, number> & { warns: string[] }
-type ZPair = {
-        <C extends readonly [Node, ...Node[]], A extends string>(lower: A, children: readonly [...C]): TaggedPairs<[A, ...C]>
-        <T extends readonly [string, string, ...string[]]>(...keys: T): TaggedPairs<T>
+type Pair = [string, string]
+type Edge<T extends readonly unknown[] = readonly unknown[]> = readonly Pair[] & { [SYM]?: T }
+type Node = string | Function | Edge | readonly Node[]
+// prettier-ignore
+type _Keys<T> = T extends string ? T :
+        T extends Edge<infer U> ? _Keys<U> :
+        T extends readonly (infer R)[] ? _Keys<R> :
+        T extends Function ? Exclude<keyof T, keyof Function> :
+        never
+// prettier-ignore
+type Keys<Ret> =
+        Ret extends Edge<infer U> ? _Keys<U> :
+        Ret extends readonly (infer R)[] ? Keys<R> :
+        never
+export type ZReq = unknown | unknown[] // Edge | Edge[] @TODO FIX: Instantiations: 29243 → 64816
+export type ZRes<K extends string = string> = Record<K, number>
+export type ZApi<K extends string = string> = ZExt<K> & ZRes<K>
+export type ZFun = {
+        <const T extends readonly string[]>(...args: T): Edge<T> // @MEMO Instantiations: 29637 →　29243
+        <const T extends readonly Node[]>(...args: T): Edge<T>
 }
-const STEP = 1 << 10
+export type ZExt<K extends string = string> = {
+        <const Ret extends ZReq>(build: (z: ZFun) => Ret): ZApi<K | Keys<Ret>>
+}
+const SYM = Symbol('z')
 const INF = 1 << 30
-const { max, min } = Math
-const clamp = (x: number, a: number, b: number): number => (x < a ? a : x > b ? b : x)
-const isPair = (v: unknown): v is Pair => Array.isArray(v) && v.length === 2 && typeof v[0] === 'string' && typeof v[1] === 'string'
-const rootOfPairs = (arr: Pair[]): string => (arr.length ? arr[0][0] : '')
-const pair: ZPair = ((...keys: readonly [string, ...Node[]] | readonly [string, string, ...string[]]) => {
-        const res: Pair[] = []
-        const parent = keys[0] as string
-        const link = (p: string, node: Node): void => {
-                if (typeof node === 'string') {
-                        res.push([p, node])
-                        return
-                }
-                if (Array.isArray(node)) {
-                        if (node.length && isPair(node[0])) {
-                                const root = rootOfPairs(node as Pair[])
-                                if (root) res.push([p, root])
-                                for (const e of node as Pair[]) res.push(e)
-                                return
-                        }
-                        for (const v of node) link(p, v as Node)
-                        return
-                }
-                throw new Error('invalid node')
+const STEP = 1 << 10
+const START = STEP
+const { max, min, floor } = Math
+const clamp = (x: number, a: number, b: number) => min(max(x, a), b)
+const edge = (p: Pair[]) => {
+        // @ts-ignore
+        p[SYM] = true
+        return p
+}
+// @ts-ignore
+const isEdge = (v: unknown): v is Edge => Array.isArray(v) && !!v[SYM]
+const sources = (ps: readonly Pair[]): string[] => {
+        const d = new Map<string, number>()
+        for (const [a, b] of ps) {
+                if (!d.has(a)) d.set(a, 0)
+                d.set(b, (d.get(b) || 0) + 1)
         }
-        if (keys.length === 2) link(parent, keys[1] as Node)
-        else {
-                for (let i = 0; i < keys.length - 1; i += 1) {
-                        const a = keys[i]
-                        const b = keys[i + 1]
-                        if (typeof a !== 'string' || typeof b !== 'string') throw new Error('linear keys must be strings')
-                        res.push([a, b])
-                }
+        const r: string[] = []
+        for (const [k, v] of d) if (v === 0) r.push(k)
+        return r
+}
+const gather = (n: Node): { entries: string[]; pairs: readonly Pair[] } => {
+        if (typeof n === 'string') return { entries: [n], pairs: [] }
+        if (typeof n === 'function') {
+                // @ts-ignore
+                const ks = Object.keys(n).sort((a, b) => n[a] - n[b])
+                const p: Pair[] = []
+                for (let i = 0; i < ks.length - 1; i += 1) p.push([ks[i], ks[i + 1]])
+                return { entries: ks, pairs: p }
         }
-        return res as TaggedPairs<typeof keys>
-}) as ZPair
-const flatten = (input: unknown, out: Pair[]): void => {
-        if (Array.isArray(input)) {
-                if (isPair(input)) {
-                        out.push(input)
-                        return
+        if (isEdge(n)) return { entries: sources(n), pairs: n }
+        if (Array.isArray(n)) {
+                const parts = n.map((v) => {
+                        const g = gather(v)
+                        return { e: g.entries, p: g.pairs, n: typeof v !== 'string' }
+                })
+                const entries: string[] = []
+                const pairs: Pair[] = []
+                for (const p of parts) {
+                        entries.push(...p.e)
+                        pairs.push(...p.p)
                 }
-                for (const v of input) flatten(v, out)
+                for (let i = 0; i < parts.length - 1; i += 1) if (parts[i].n && parts[i + 1].n) for (const a of parts[i].e) for (const b of parts[i + 1].e) pairs.push([a, b])
+                return { entries, pairs }
+        }
+        throw new Error('invalid node')
+}
+const z = (...args: Node[]): Edge => {
+        const g = args.map(gather)
+        const r: Pair[] = []
+        for (const x of g) r.push(...x.pairs)
+        for (let i = 0; i < g.length - 1; i += 1) for (const a of g[i].entries) for (const b of g[i + 1].entries) r.push([a, b])
+        return edge(r)
+}
+const collect = (v: unknown, out: Pair[]): void => {
+        if (isEdge(v)) {
+                out.push(...v)
+                return
+        }
+        if (Array.isArray(v)) {
+                for (const x of v) collect(x, out)
                 return
         }
         throw new Error('invalid pair')
 }
 const topo = (pairs: Pair[], extras: string[]) => {
+        const succ = new Map<string, string[]>()
+        const preds = new Map<string, string[]>()
         const indeg = new Map<string, number>()
-        const adj = new Map<string, string[]>()
-        for (const k of extras) {
-                if (!adj.has(k)) adj.set(k, [])
+        const add = (k: string) => {
+                if (!succ.has(k)) succ.set(k, [])
                 if (!indeg.has(k)) indeg.set(k, 0)
+                if (!preds.has(k)) preds.set(k, [])
         }
         for (const [a, b] of pairs) {
-                if (!adj.has(a)) adj.set(a, [])
-                if (!adj.has(b)) adj.set(b, [])
-                if (!indeg.has(a)) indeg.set(a, 0)
-                if (!indeg.has(b)) indeg.set(b, 0)
-                adj.get(a)!.push(b)
+                add(a)
+                add(b)
+                succ.get(a)!.push(b)
                 indeg.set(b, (indeg.get(b) || 0) + 1)
+                preds.get(b)!.push(a)
         }
+        for (const k of extras) add(k)
         const q: string[] = []
         for (const [k, v] of indeg) if (v === 0) q.push(k)
         const order: string[] = []
-        for (const n of q) {
+        for (let i = 0; i < q.length; i += 1) {
+                const n = q[i]
                 order.push(n)
-                for (const m of adj.get(n) || []) {
-                        const d = (indeg.get(m) || 0) - 1
-                        indeg.set(m, d)
-                        if (d === 0) q.push(m)
+                for (const v of succ.get(n)!) {
+                        const d = indeg.get(v)! - 1
+                        indeg.set(v, d)
+                        if (d === 0) q.push(v)
                 }
         }
         if (order.length !== indeg.size) throw new Error('cycle')
-        return { order, adj }
+        return { order, preds, succ }
 }
-const downer = (pairs: Pair[]) => {
-        const down = new Map<string, string[]>()
-        for (const [a, b] of pairs) {
-                if (!down.has(b)) down.set(b, [])
-                down.get(b)!.push(a)
-                if (!down.has(a)) down.set(a, [])
-        }
-        return down
-}
-const safely = (primary: number, secondary = 0): number => {
-        if (primary === INF || primary === -INF) return secondary
-        return primary
-}
-const lower = (lo: number, fences: number[]) => (lo !== -INF ? lo : fences.length ? fences[0] - STEP : 0)
-const upper = (up: number, lo: number, fences: number[]) => {
-        if (up !== INF) return up
-        if (fences.length) return fences[fences.length - 1] + STEP
-        return lo + STEP
-}
-const bound = (arr: number[], v: number): number => {
-        let l = 0
-        let r = arr.length
-        for (; l < r; ) {
-                const m = (l + r) >> 1
-                if (arr[m] < v) l = m + 1
-                else r = m
-        }
-        return l
-}
-const fence = (seeds: number[], lo: number, up: number): [number, number] => {
-        if (!seeds.length) return [lo, up]
-        const idx = bound(seeds, lo + 1)
-        if (idx >= seeds.length) return [lo, up]
-        const seed = seeds[idx]
-        if (seed >= up) return [lo, up]
-        return [clamp(seeds[idx - 1] ?? lo, lo, up), clamp(seed, lo, up)]
-}
-const assign = <K extends string>(pairs: Pair[], seeds?: Record<K, number>): ZRes<K> => {
-        if (!seeds) {
-                const { order } = topo(pairs, [])
-                const items = {} as Record<K, number>
-                for (let i = 0; i < order.length; i += 1) items[order[i] as K] = i * STEP
-                return { items, warns: [] }
-        }
-        const warns: string[] = []
-        const { order, adj } = topo(pairs, Object.keys(seeds))
-        const down = downer(pairs)
-        const [_lo, _up]: Record<string, number>[] = [{}, {}]
-        for (const k of order) {
-                const key = k as K
-                if (key in seeds) {
-                        _lo[key] = _up[key] = seeds[key]
+const assign = (pairs: Pair[], seeds: ZRes = {}): ZRes => {
+        const { order, preds, succ } = topo(pairs, Object.keys(seeds))
+        const lo: Record<string, number> = {}
+        const hi: Record<string, number> = {}
+        const depth: Record<string, number> = {}
+        const width: Record<number, number> = {}
+        const cursor: Record<number, number> = {}
+        for (const n of order) depth[n] = 0
+        for (const n of order) for (const v of succ.get(n)!) depth[v] = max(depth[v] || 0, (depth[n] || 0) + 1)
+        for (const n of order) width[depth[n]] = (width[depth[n]] || 0) + 1
+        for (const n of order) {
+                if (n in seeds) {
+                        lo[n] = seeds[n]
+                        hi[n] = seeds[n]
                         continue
                 }
-                _lo[key] = -INF
-                _up[key] = INF
+                lo[n] = -INF
+                hi[n] = INF
         }
-        for (const k of order) {
-                const base = safely(_lo[k])
-                for (const s of adj.get(k) || []) _lo[s] = max(_lo[s], base + 1)
+        for (const n of order) {
+                let base = lo[n]
+                if (n in seeds) base = seeds[n]
+                if (base !== -INF) for (const v of succ.get(n)!) if (!(v in seeds)) lo[v] = max(lo[v], base + 1)
         }
         for (let i = order.length - 1; i >= 0; i -= 1) {
-                const k = order[i]
-                const base = safely(_up[k], _lo[k])
-                for (const p of down.get(k) || []) _up[p] = min(_up[p], base - 1)
+                const n = order[i]
+                let base = hi[n]
+                if (n in seeds) base = seeds[n]
+                if (base !== INF) for (const p of preds.get(n)!) if (!(p in seeds)) hi[p] = min(hi[p], base - 1)
         }
-        const items = { ...seeds }
-        const fences = Object.values(seeds) as number[]
-        fences.sort((a, b) => a - b)
-        for (const k of order) {
-                if (k in seeds) continue
-                let lo = lower(_lo[k], fences)
-                let up = upper(_up[k], lo, fences)
-                ;[lo, up] = fence(fences, lo, up)
-                const gap = up - lo
-                if (gap <= 4) warns.push(`narrow gap ${k}`)
-                items[k as K] = up
-                if (gap > 1) items[k as K] = clamp(lo + (gap >> 1), lo + 1, up - 1)
+        const items: ZRes = { ...seeds }
+        for (const n of order) {
+                if (n in seeds) continue
+                const l = lo[n]
+                const h = hi[n]
+                const hasL = l !== -INF
+                const hasH = h !== INF
+                let v: number
+                if (!hasL && !hasH) {
+                        const d = depth[n] || 0
+                        let spread = 0
+                        if (width[d] > 4) spread = max(1, floor(STEP / (width[d] + 1)))
+                        const idx = (cursor[d] = (cursor[d] || 0) + 1)
+                        v = START + d * STEP + spread * idx
+                } else if (!hasH) {
+                        const hasPred = preds.get(n)!.length > 0
+                        if (hasPred) v = l - 1 + STEP
+                        else if (hasL) v = l
+                        else v = START - STEP
+                } else if (!hasL) v = max(1, (h + 1) >> 1)
+                else {
+                        const gap = h - l
+                        // if (gap <= 1) throw `narrow gap ${n}` // @TODO FIX narrow gap
+                        v = l + max(1, gap >> 1)
+                }
+                let low = -INF
+                if (hasL) low = l + 1
+                let high = INF
+                if (hasH) high = h - 1
+                items[n] = clamp(v, low, high)
         }
-        return { items, warns }
+        return items
 }
-const api = <K extends string>({ items, warns }: ZRes<K>): ZApi<K> => {
-        const ext = <P extends readonly unknown[]>(build: (z: ZPair) => P): ZApi<K | Keys<P>> => {
+const api = (items: ZRes): ZApi => {
+        const ext: ZExt = (build) => {
                 const pairs: Pair[] = []
-                for (const item of build(pair)) flatten(item, pairs)
-                const next = assign<K | Keys<P>>(pairs, items as Record<K | Keys<P>, number>)
-                return api<K | Keys<P>>({ items: next.items, warns: [...warns, ...next.warns] })
+                collect(build(z as ZFun), pairs)
+                const next = assign(pairs, items)
+                return api(next)
         }
-        return Object.assign(ext, { ...items, warns })
+        return Object.assign(ext, items)
 }
-export function index<P extends readonly unknown[]>(build: (z: ZPair) => P): ZApi<Keys<P>> {
+export function index<const Ret extends ZReq>(build: (z: ZFun) => Ret): ZApi<Keys<Ret>> {
         const pairs: Pair[] = []
-        for (const item of build(pair)) flatten(item, pairs)
-        return api<Keys<P>>(assign<Keys<P>>(pairs))
+        collect(build(z as ZFun), pairs)
+        return api(assign(pairs))
 }
-
 export default index

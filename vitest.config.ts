@@ -5,7 +5,8 @@ export default defineConfig({
                 include: ['**/*.test.ts'],
                 exclude: ['node_modules/**', 'dist/**'],
                 coverage: {
-                        provider: 'v8', // or 'istanbul'
+                        provider: 'v8',
+                        include: ['index.ts'],
                         reporter: ['text', 'json', 'html'],
                         reportsDirectory: './logs/coverage',
                 },

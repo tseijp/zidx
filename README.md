@@ -83,7 +83,7 @@ lifting all key names into TypeScript inference so downstream packages share ide
 
 A z-idx build receives a helper z. Passing multiple strings like `z('a','b','c') `emits ordered pairs `a<b<c` with uniform stride.
 Passing a parent and an array such as `z('a',['b','c','d'])` links the parent below each child while keeping siblings equally spaced.
-Nested arrays or previously returned TaggedPairs can be embedded, enabling tree-shaped DAGs without losing ordering.
+Nested arrays or previously returned Edge can be embedded, enabling tree-shaped DAGs without losing ordering.
 Ranks start with a wide STEP (`1<<10`) so later inserts can bisect gaps without moving seeded nodes.
 A topological pass (Kahn) rejects cycles; a second pass computes lower and upper bounds per node,
 clamps against seeded fences, then selects midpoints, pushing narrow gaps into warns.
@@ -92,17 +92,17 @@ clamps against seeded fences, then selects midpoints, pushing narrow gaps into w
 
 z-idx returns an object that is both callable and map-like.Every key encountered during build is captured in the return type,
 allowing editors to suggest properties (`base.a`, `base.b`) and to hint previous keys during extension (`base((z)=>[z('b','x','c')])`).
-TaggedPairs preserve their embedded key set even when nested inside arrays, so deeply composed trees still surface full autocomplete.
+Edge preserve their embedded key set even when nested inside arrays, so deeply composed trees still surface full autocomplete.
 
 ### API Surface
 
 ```ts
-(build: (z: ZPair) => P): ZApi<Keys<P>>
+(build: (z: ZFun) => P): ZApi<Keys<P>>
 ```
 
-`ZPair` supports two shapes. Linear form: `z(lower, mid, upper, ...)` creates consecutive relations.
+`ZFun` supports two shapes. Linear form: `z(lower, mid, upper, ...)` creates consecutive relations.
 Tree form: `z(parent, childrenArray)` where childrenArray may contain strings, nested arrays,
-or TaggedPairs; siblings share equal rank stride and retain declared order.
+or Edge; siblings share equal rank stride and retain declared order.
 Returned `ZApi` is callable for extension; it also exposes numeric ranks and a `warns` array.
 
 ## Pair Catalogue
@@ -117,7 +117,7 @@ Composite inference confirms all keys `{a,b,c,d,e}` appear numerically typed.
 
 ### Pair Recursion
 
-TaggedPairs can be reused as children.
+Edge can be reused as children.
 Building `const chain = z('b','c','d'); z('a',[chain,'e'])` links `a` under the chain root and continues equal steps through `e->c->d`.
 Multiple tagged subtrees under one parent keep uniform spacing (`a` below `b<c<d<e`).
 Mixed top-level chains with sibling arrays maintain one stride while branching (`a<b<d<e<c<f<g`).

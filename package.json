@@ -48,6 +48,7 @@
                 "build": "vite build",
                 "tsup": "npx tsup",
                 "preview": "vite preview",
+                "perf": "npx tsc --noEmit --extendedDiagnostics 2>&1 | grep '^Instantiations:'",
                 "pub": "npx changeset publish",
                 "test": "npx vitest run --coverage"
         },
