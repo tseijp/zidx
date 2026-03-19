@@ -292,7 +292,7 @@ flowchart LR
 ```
 
 ```ts
-z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')
+z(['a', 'b'], ['c', 'd']), z('a', 'b'), z('c', 'd')
 ```
 
 </td>
@@ -329,7 +329,37 @@ flowchart LR
 ```
 
 ```ts
-z('a', ['b', 'c', 'd']), z('b', ['c', 'd'])
+z(['a', 'b'], ['c', 'd']), z('a', 'b')
+```
+
+</td>
+<td nowrap>
+
+```mermaid
+flowchart LR
+    subgraph x[" "]
+        direction TB
+        a
+        b
+    end
+    subgraph y[" "]
+        direction TB
+        c
+        d
+    end
+    a ~~~ b
+    c ~~~ d
+    style x fill:none,stroke:none
+    style y fill:none,stroke:none
+    a --> c
+    a --> d
+    c --> d
+    b --> d
+    b --> c
+```
+
+```ts
+z(['a', 'b'], ['c', 'd']), z('c', 'd')
 ```
 
 </td>
@@ -389,7 +419,7 @@ flowchart LR
 ```
 
 ```ts
-z('a', ['b', 'c', 'd']), z(['b', 'c'], 'd')
+z('a', ['b', 'c'], 'd'), z('a', 'd')
 ```
 
 </td>
@@ -416,11 +446,10 @@ flowchart LR
     b --> c
     c --> d
     b --> d
-
 ```
 
 ```ts
-z('a', 'b', ['c', 'd']), z('a', 'c', 'd')
+z('a', ['b', 'c'], 'd'), z('b', 'c')
 ```
 
 </td>
@@ -447,42 +476,10 @@ flowchart LR
     b --> c
     b --> d
     c --> d
-
 ```
 
 ```ts
 z('a', 'b', ['c', 'd']), z(['a', 'c'], 'd')
-```
-
-</td>
-<td nowrap>
-
-```mermaid
-flowchart LR
-    subgraph x[" "]
-        direction TB
-        a
-        b
-    end
-    subgraph y[" "]
-        direction TB
-        c
-        d
-    end
-    a ~~~ b
-    c ~~~ d
-    style x fill:none,stroke:none
-    style y fill:none,stroke:none
-    b --> c
-    c --> d
-    b --> d
-    a --> c
-    a --> d
-
-```
-
-```ts
-z('a', ['c', 'd']), z('b', ['c', 'd']), z('c', 'd')
 ```
 
 </td>
@@ -511,11 +508,39 @@ flowchart LR
     c ~~~ d
     style x fill:none,stroke:none
     style y fill:none,stroke:none
+    a --> c
+    b --> d
+    a --> d
+    b --> c
+```
+
+```ts
+z(['a', 'b'], ['c', 'd'])
+```
+
+</td>
+<td nowrap>
+
+```mermaid
+flowchart LR
+    subgraph x[" "]
+        direction TB
+        a
+        b
+    end
+    subgraph y[" "]
+        direction TB
+        c
+        d
+    end
+    a ~~~ b
+    c ~~~ d
+    style x fill:none,stroke:none
+    style y fill:none,stroke:none
     a --> b
     a --> c
     a --> d
     b --> c
-
 ```
 
 ```ts
@@ -545,7 +570,6 @@ flowchart LR
     a --> c
     b --> c
     b --> d
-
 ```
 
 ```ts
@@ -560,36 +584,6 @@ flowchart LR
     subgraph x[" "]
         direction TB
         a
-        b
-    end
-    subgraph y[" "]
-        direction TB
-        c
-        d
-    end
-    a ~~~ b
-    c ~~~ d
-    style x fill:none,stroke:none
-    style y fill:none,stroke:none
-    a --> c
-    b --> d
-    a --> d
-    b --> c
-
-```
-
-```ts
-z('a', ['c', 'd']), z('b', ['c', 'd'])
-```
-
-</td>
-<td nowrap>
-
-```mermaid
-flowchart LR
-    subgraph x[" "]
-        direction TB
-        a
         c
     end
     subgraph y[" "]
@@ -605,11 +599,10 @@ flowchart LR
     a --> c
     b --> c
     c --> d
-
 ```
 
 ```ts
-z('a', ['b', 'c']), z('b', 'c', 'd')
+z('a', 'b', 'c', 'd'), z('a', 'c')
 ```
 
 </td>
@@ -635,11 +628,10 @@ flowchart LR
     a --> d
     b --> c
     c --> d
-
 ```
 
 ```ts
-z('a', ['b', 'd']), z('b', 'c', 'd')
+z('a', 'b', 'c', 'd'), z('a', 'd')
 ```
 
 </td>
@@ -665,11 +657,10 @@ flowchart LR
     a --> d
     b --> c
     c --> d
-
 ```
 
 ```ts
-z('a', ['c', 'd']), z('b', 'c', 'd')
+z(['a', 'b'], 'c', 'd'), z('a', 'd')
 ```
 
 </td>
@@ -693,11 +684,10 @@ flowchart LR
     a --> c
     b --> d
     c --> d
-
 ```
 
 ```ts
-z('a', ['b', 'c']), z(['b', 'c'], 'd')
+z('a', ['b', 'c'], 'd')
 ```
 
 </td>
@@ -722,7 +712,6 @@ flowchart LR
     a --> d
     b --> d
     c --> d
-
 ```
 
 ```ts
@@ -787,7 +776,6 @@ flowchart LR
     a --> b
     a --> c
     a --> d
-
 ```
 
 ```ts
@@ -816,7 +804,6 @@ flowchart LR
     a --> b
     a --> c
     b --> c
-
 ```
 
 ```ts
@@ -845,11 +832,10 @@ flowchart LR
     a --> c
     a --> d
     b --> c
-
 ```
 
 ```ts
-z('a', ['c', 'd']), z('b', 'c')
+z(['a', 'b'], 'c'), z('a', 'd')
 ```
 
 </td>
@@ -874,11 +860,10 @@ flowchart LR
     a --> b
     b --> c
     b --> d
-
 ```
 
 ```ts
-z('a', 'b'), z('b', ['c', 'd'])
+z('a', 'b', ['c', 'd'])
 ```
 
 </td>
@@ -903,7 +888,6 @@ flowchart LR
     a --> b
     b --> c
     c --> d
-
 ```
 
 ```ts
@@ -932,7 +916,6 @@ flowchart LR
     a --> c
     b --> c
     c --> d
-
 ```
 
 ```ts
@@ -961,7 +944,6 @@ flowchart LR
     a --> d
     b --> c
     c --> d
-
 ```
 
 ```ts
@@ -990,7 +972,6 @@ flowchart LR
     a --> d
     b --> d
     c --> d
-
 ```
 
 ```ts
@@ -1025,7 +1006,6 @@ flowchart LR
     style y fill:none,stroke:none
     a --> b
     b --> c
-
 ```
 
 ```ts
@@ -1053,7 +1033,6 @@ flowchart LR
     style y fill:none,stroke:none
     a --> b
     a --> c
-
 ```
 
 ```ts
@@ -1095,24 +1074,23 @@ flowchart LR
     subgraph x[" "]
         direction TB
         a
-        b
+        c
     end
     subgraph y[" "]
         direction TB
-        c
+        b
         d
     end
     a ~~~ b
     c ~~~ d
     style x fill:none,stroke:none
     style y fill:none,stroke:none
-    a --> d
-    b --> c
-
+    a --> b
+    c --> d
 ```
 
 ```ts
-z('a', 'd'), z('b', 'c')
+z('a', 'b'), z('c', 'd')
 ```
 
 </td>
@@ -1141,7 +1119,6 @@ flowchart LR
     style x fill:none,stroke:none
     style y fill:none,stroke:none
     a --> b
-
 ```
 
 ```ts
@@ -1203,8 +1180,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
-    a --> b --> c --> d --> e
     style g fill:none,stroke:none,color:none
+    a --> b
+    b --> c
+    c --> d
+    e --> e
 ```
 
 ```ts
@@ -1222,11 +1202,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     a --> d
     a --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1244,11 +1224,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> e
     b --> e
     c --> e
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1266,12 +1246,12 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     b --> d
     c --> d
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1293,12 +1273,12 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     b --> e
     a --> c
     c --> d
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1316,11 +1296,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     b --> d
     c --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1338,11 +1318,11 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     a --> c
     a --> d
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts
@@ -1360,12 +1340,12 @@ flowchart LR
     g ~~~ c
     g ~~~ d
     g ~~~ e
+    style g fill:none,stroke:none,color:none
     a --> b
     b --> c
     b --> d
     c --> e
     d --> e
-    style g fill:none,stroke:none,color:none
 ```
 
 ```ts

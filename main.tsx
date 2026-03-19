@@ -36,6 +36,33 @@ const menuTree = toTree(
                         <NavNode id="lang-en" label="English" note="README.md" action={() => runtime.render?.('en')} />
                         <NavNode id="lang-ja" label="日本語" note="README.ja.md" action={() => runtime.render?.('ja')} />
                 </NavNode>
+                <NavNode id="toc" label="TOC">
+                        <NavNode id="toc-rationale" label="2. Rationale">
+                                <NavNode id="toc-core" label="2.1. Core Concepts" href="#core-concepts" />
+                                <NavNode id="toc-type" label="2.2. Type Inference" href="#type-inference" />
+                                <NavNode id="toc-api" label="2.3. API Surface" href="#api-surface" />
+                        </NavNode>
+                        <NavNode id="toc-pairs" label="3. Pair Catalogue">
+                                <NavNode id="toc-pair-basics" label="3.1. Pair Basics" href="#pair-basics" />
+                                <NavNode id="toc-pair-recursion" label="3.2. Pair Recursion" href="#pair-recursion" />
+                                <NavNode id="toc-pair-inference" label="3.3. Pair Inference" href="#pair-inference" />
+                        </NavNode>
+                        <NavNode id="toc-topology" label="4. Topology Atlas">
+                                <NavNode id="toc-three" label="4.1. Three Nodes" href="#three-nodes" />
+                                <NavNode id="toc-four" label="4.2. Four Nodes" href="#four-nodes" />
+                                <NavNode id="toc-five" label="4.3. Five Nodes" href="#five-nodes" />
+                        </NavNode>
+                        <NavNode id="toc-ext" label="5. Extensions">
+                                <NavNode id="toc-ext-stability" label="5.1. Extension Stability" href="#extension-stability" />
+                                <NavNode id="toc-ext-density" label="5.2. Extension Density" href="#extension-density" />
+                                <NavNode id="toc-ext-packing" label="5.3. Extension Packing" href="#extension-packing" />
+                        </NavNode>
+                        <NavNode id="toc-appendix" label="6. Appendix">
+                                <NavNode id="toc-design" label="6.1. Design Notes" href="#design-notes" />
+                                <NavNode id="toc-contrib" label="6.2. Contributing" href="#contributing" />
+                                <NavNode id="toc-license" label="6.3. License" href="#license" />
+                        </NavNode>
+                </NavNode>
                 <NavNode id="links" label="Links">
                         <NavNode id="github" label="GitHub" note="Source">
                                 <NavNode id="github-code" label="Code" href="https://github.com/tseijp/z-idx"></NavNode>
@@ -68,33 +95,6 @@ const menuTree = toTree(
                                 <NavNode id="ext-stability" label="extension-stability" note="2.0.extension-stability.test.ts" href="https://github.com/tseijp/z-idx/blob/main/2.0.extension-stability.test.ts" />
                                 <NavNode id="ext-density" label="extension-density" note="2.1.extension-density.test.ts" href="https://github.com/tseijp/z-idx/blob/main/2.1.extension-density.test.ts" />
                                 <NavNode id="ext-packing" label="extension-packing" note="2.2.extension-packing.test.ts" href="https://github.com/tseijp/z-idx/blob/main/2.2.extension-packing.test.ts" />
-                        </NavNode>
-                </NavNode>
-                <NavNode id="toc" label="TOC">
-                        <NavNode id="toc-rationale" label="2. Rationale">
-                                <NavNode id="toc-core" label="2.1. Core Concepts" href="#core-concepts" />
-                                <NavNode id="toc-type" label="2.2. Type Inference" href="#type-inference" />
-                                <NavNode id="toc-api" label="2.3. API Surface" href="#api-surface" />
-                        </NavNode>
-                        <NavNode id="toc-pairs" label="3. Pair Catalogue">
-                                <NavNode id="toc-pair-basics" label="3.1. Pair Basics" href="#pair-basics" />
-                                <NavNode id="toc-pair-recursion" label="3.2. Pair Recursion" href="#pair-recursion" />
-                                <NavNode id="toc-pair-inference" label="3.3. Pair Inference" href="#pair-inference" />
-                        </NavNode>
-                        <NavNode id="toc-topology" label="4. Topology Atlas">
-                                <NavNode id="toc-three" label="4.1. Three Nodes" href="#three-nodes" />
-                                <NavNode id="toc-four" label="4.2. Four Nodes" href="#four-nodes" />
-                                <NavNode id="toc-five" label="4.3. Five Nodes" href="#five-nodes" />
-                        </NavNode>
-                        <NavNode id="toc-ext" label="5.1 Extensions">
-                                <NavNode id="toc-ext-stability" label="5.1. Extension Stability" href="#extension-stability" />
-                                <NavNode id="toc-ext-density" label="5.2. Extension Density" href="#extension-density" />
-                                <NavNode id="toc-ext-packing" label="5.3. Extension Packing" href="#extension-packing" />
-                        </NavNode>
-                        <NavNode id="toc-appendix" label="6. Appendix">
-                                <NavNode id="toc-design" label="6.1. Design Notes" href="#design-notes" />
-                                <NavNode id="toc-contrib" label="6.2. Contributing" href="#contributing" />
-                                <NavNode id="toc-license" label="6.3. License" href="#license" />
                         </NavNode>
                 </NavNode>
         </>
@@ -266,19 +266,3 @@ createRoot(document.getElementById('app')!).render(<App />)
 
 // @ts-ignore
 window.index = index
-
-const ok = index((z) => z('a', 'b', 'c'))
-
-const ok2 = index((z) => [z('a', 'b', 'c')])
-
-const ng = index((z) => z(['a', 'b'], 'c'))
-
-const ng2 = index((z) => [z(['a', 'b'], 'c')])
-
-const ok3 = index((z) => z('a', z('b', 'c')))
-
-const ok4 = index((z) => [z('a', z('b', 'c'))])
-
-const ng3 = index((z) => z('a', [z('b', 'c')]))
-
-const ng4 = index((z) => [z('a', [z('b', 'c')])])

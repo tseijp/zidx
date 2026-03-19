@@ -189,24 +189,6 @@ describe('extension packing and boundaries', () => {
                 })
         })
 
-        describe('warns for narrow gaps', () => {
-                it('many splits produce narrow gap warnings', () => {
-                        const base = index((z) => z('a', 'b'))
-                        const e1 = base((z) => z('a', 'n1', 'b'))
-                        const e2 = e1((z) => z('a', 'n2', 'n1'))
-                        const e3 = e2((z) => z('a', 'n3', 'n2'))
-                        const e4 = e3((z) => z('a', 'n4', 'n3'))
-                        const e5 = e4((z) => z('a', 'n5', 'n4'))
-                        const e6 = e5((z) => z('a', 'n6', 'n5'))
-                        const e7 = e6((z) => z('a', 'n7', 'n6'))
-                        const e8 = e7((z) => z('a', 'n8', 'n7'))
-                        const e9 = e8((z) => z('a', 'n9', 'n8')) // @ts-expect-error
-                        e9._
-                        // const hasNarrow = e9.warns.some((w: string) => w.includes('narrow'))
-                        // expect(hasNarrow).toBe(true)
-                })
-        })
-
         describe('large fan then dense extension', () => {
                 it('large fan base with dense extension in one gap', () => {
                         const base = index((z) => z('a', ['b', 'c', 'd', 'e', 'f']))

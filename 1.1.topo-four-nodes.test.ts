@@ -5,7 +5,7 @@ import { absolute, relative, S } from './utils'
 describe('four nodes', () => {
         describe('6 edges', () => {
                 it('complete DAG: a < b < c < d with all transitive edges', () => {
-                        const r = index((z) => [z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')])
+                        const r = index((z) => [z(['a', 'b'], ['c', 'd']), z('a', 'b'), z('c', 'd')]) // z('a', ['b', 'c', 'd']), z('b', ['c', 'd']), z('c', 'd')
                         relative(r, 'a', 'b', 'c', 'd')
                         absolute(r, ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd']) // @ts-expect-error
                         r._
@@ -14,93 +14,93 @@ describe('four nodes', () => {
 
         describe('5 edges', () => {
                 it('5e-1: a fan to [b,c,d] plus b fan to [c,d]', () => {
-                        const r = index((z) => [z('a', ['b', 'c', 'd']), z('b', ['c', 'd'])])
+                        const r = index((z) => [z(['a', 'b'], ['c', 'd']), z('a', 'b')]) // z('a', ['b', 'c', 'd']), z('b', ['c', 'd'])
                         relative(r, 'a', 'b', ['c', 'd'])
                         absolute(r, ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd']) // @ts-expect-error
                         r._
                 })
 
-                it('5e-2: a fan to [b,c,d] plus b chain c chain d', () => {
+                it('5e-2: a fan [c,d] plus b fan [c,d] plus c chain d', () => {
+                        const r = index((z) => [z(['a', 'b'], ['c', 'd']), z('c', 'd')]) // z('a', ['c', 'd']), z('b', ['c', 'd']), z('c', 'd')
+                        relative(r, ['a', 'b'], 'c', 'd')
+                        absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd']) // @ts-expect-error
+                        r._
+                })
+
+                it('5e-3: a fan to [b,c,d] plus b chain c chain d', () => {
                         const r = index((z) => [z('a', ['b', 'c', 'd']), z('b', 'c', 'd')])
                         relative(r, 'a', 'b', 'c', 'd')
                         absolute(r, ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
-                it('5e-3: a fan to [b,c,d] plus [b,c] < d', () => {
-                        const r = index((z) => [z('a', ['b', 'c', 'd']), z(['b', 'c'], 'd')])
+                it('5e-4: a fan to [b,c,d] plus [b,c] < d', () => {
+                        const r = index((z) => [z('a', ['b', 'c'], 'd'), z('a', 'd')]) // z('a', ['b', 'c', 'd']), z(['b', 'c'], 'd')
                         relative(r, 'a', ['b', 'c'], 'd')
                         absolute(r, ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'd'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
-                it('5e-4: a chain b fan [c,d] plus a chain c chain d', () => {
-                        const r = index((z) => [z('a', 'b', ['c', 'd']), z('a', 'c', 'd')])
+                it('5e-5: a chain b fan [c,d] plus a chain c chain d', () => {
+                        const r = index((z) => [z('a', ['b', 'c'], 'd'), z('b', 'c')]) // z('a', 'b', ['c', 'd']), z('a', 'c', 'd')
                         relative(r, 'a', 'b', 'c', 'd')
                         absolute(r, ['a', 'b'], ['a', 'c'], ['b', 'c'], ['b', 'd'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
-                it('5e-5: a chain b fan [c,d] plus [a,c] < d', () => {
+                it('5e-6: a chain b fan [c,d] plus [a,c] < d', () => {
                         const r = index((z) => [z('a', 'b', ['c', 'd']), z(['a', 'c'], 'd')])
                         relative(r, 'a', 'b', 'c', 'd')
                         absolute(r, ['a', 'b'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
-
-                it('5e-6: a fan [c,d] plus b fan [c,d] plus c chain d', () => {
-                        const r = index((z) => [z('a', ['c', 'd']), z('b', ['c', 'd']), z('c', 'd')])
-                        relative(r, ['a', 'b'], 'c', 'd')
-                        absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd']) // @ts-expect-error
-                        r._
-                })
         })
 
         describe('4 edges', () => {
-                it('4e-1: a fan [b,c,d] plus b chain c', () => {
+                it('4e-1: a fan [c,d] plus b fan [c,d]', () => {
+                        const r = index((z) => [z(['a', 'b'], ['c', 'd'])]) // z(['a', 'b'], 'c'), z(['a', 'b'], 'd')
+                        relative(r, ['a', 'b'], ['c', 'd'])
+                        absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd']) // @ts-expect-error
+                        r._
+                })
+
+                it('4e-2: a fan [b,c,d] plus b chain c', () => {
                         const r = index((z) => [z('a', ['b', 'c', 'd']), z('b', 'c')])
                         relative(r, 'a', ['b', 'd'], 'c')
                         absolute(r, ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c']) // @ts-expect-error
                         r._
                 })
 
-                it('4e-2: a fan [b,c] plus b fan [c,d]', () => {
+                it('4e-3: a fan [b,c] plus b fan [c,d]', () => {
                         const r = index((z) => [z('a', ['b', 'c']), z('b', ['c', 'd'])])
                         relative(r, 'a', 'b', ['c', 'd'])
                         absolute(r, ['a', 'b'], ['a', 'c'], ['b', 'c'], ['b', 'd']) // @ts-expect-error
                         r._
                 })
 
-                it('4e-3: a fan [c,d] plus b fan [c,d]', () => {
-                        const r = index((z) => [z('a', ['c', 'd']), z('b', ['c', 'd'])])
-                        relative(r, ['a', 'b'], ['c', 'd'])
-                        absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd']) // @ts-expect-error
-                        r._
-                })
-
                 it('4e-4: a fan [b,c] plus b chain c chain d', () => {
-                        const r = index((z) => [z('a', ['b', 'c']), z('b', 'c', 'd')])
+                        const r = index((z) => [z('a', 'b', 'c', 'd'), z('a', 'c')]) // z('a', ['b', 'c']), z('b', 'c', 'd')
                         relative(r, 'a', 'b', 'c', 'd')
                         absolute(r, ['a', 'b'], ['a', 'c'], ['b', 'c'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
                 it('4e-5: a fan [b,d] plus b chain c chain d', () => {
-                        const r = index((z) => [z('a', ['b', 'd']), z('b', 'c', 'd')])
+                        const r = index((z) => [z('a', 'b', 'c', 'd'), z('a', 'd')]) // z('a', ['b', 'd']), z('b', 'c', 'd')
                         relative(r, 'a', 'b', 'c', 'd')
                         absolute(r, ['a', 'b'], ['a', 'd'], ['b', 'c'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
                 it('4e-6: a fan [c,d] plus b chain c chain d', () => {
-                        const r = index((z) => [z('a', ['c', 'd']), z('b', 'c', 'd')])
+                        const r = index((z) => [z(['a', 'b'], 'c', 'd'), z('a', 'd')]) // z('a', ['c', 'd']), z('b', 'c', 'd')
                         relative(r, ['a', 'b'], 'c', 'd')
                         absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
 
                 it('4e-7: a fan [b,c] plus [b,c] < d', () => {
-                        const r = index((z) => [z('a', ['b', 'c']), z(['b', 'c'], 'd')])
+                        const r = index((z) => z('a', ['b', 'c'], 'd')) // z('a', ['b', 'c']), z(['b', 'c'], 'd')
                         relative(r, 'a', ['b', 'c'], 'd')
                         absolute(r, ['a', 'b'], ['a', 'c'], ['b', 'd'], ['c', 'd']) // @ts-expect-error
                         r._
@@ -137,13 +137,13 @@ describe('four nodes', () => {
                 })
 
                 it('3e-3: a fan [c,d] plus b chain c', () => {
-                        const r = index((z) => [z('a', ['c', 'd']), z('b', 'c')])
+                        const r = index((z) => [z(['a', 'b'], 'c'), z('a', 'd')]) // z('a', ['c', 'd']), z('b', 'c')
                         absolute(r, ['a', 'c'], ['a', 'd'], ['b', 'c']) // @ts-expect-error
                         r._
                 })
 
                 it('3e-4: a chain b plus b fan [c,d]', () => {
-                        const r = index((z) => [z('a', 'b'), z('b', ['c', 'd'])])
+                        const r = index((z) => z('a', 'b', ['c', 'd'])) // z('a', 'b'), z('b', ['c', 'd'])
                         relative(r, 'a', 'b', ['c', 'd'])
                         absolute(r, ['a', 'b'], ['b', 'c'], ['b', 'd']) // @ts-expect-error
                         r._
@@ -200,9 +200,9 @@ describe('four nodes', () => {
                 })
 
                 it('2e-4: two disconnected edges a < d and b < c', () => {
-                        const r = index((z) => [z('a', 'd'), z('b', 'c')])
-                        relative(r, ['a', 'b'], ['c', 'd'])
-                        absolute(r, ['a', 'd'], ['b', 'c']) // @ts-expect-error
+                        const r = index((z) => [z('a', 'b'), z('c', 'd')])
+                        relative(r, ['a', 'c'], ['b', 'd'])
+                        absolute(r, ['a', 'b'], ['c', 'd']) // @ts-expect-error
                         r._
                 })
         })
