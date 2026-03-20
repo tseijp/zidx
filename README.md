@@ -67,25 +67,24 @@ render(<MenuPlayground next={next} />)
 ### Purpose
 
 z-idx turns declarative partial-order z-relations into numeric stacking ranks that stay stable when extended.
-It accepts linear chains parent-to-children trees, and nested pairs,
+It accepts linear chains, parent-to-children trees, and nested pairs,
 lifting all key names into TypeScript inference so downstream packages share identical numbers even after override phases.
 
 ## Rationale
 
 ### Core Concepts
 
-A z-idx build receives a helper z. Passing multiple strings like `z('a','b','c') `emits ordered pairs `a<b<c` with uniform stride.
-Passing a parent and an array such as `z('a',['b','c','d'])` links the parent below each child while keeping siblings equally spaced.
+A z-idx build receives a helper z. Passing multiple strings like `z('a','b','c')` emits ordered pairs `a<b<c` with uniform stride.
+Passing a parent and an array such as `z('a',['b','c','d'])` links the parent below each child while placing siblings at the same rank.
 Nested arrays or previously returned Edge can be embedded, enabling tree-shaped DAGs without losing ordering.
-Ranks start with a wide STEP (`1<<10`) so later inserts can bisect gaps without moving seeded nodes.
-A topological pass (Kahn) rejects cycles; a second pass computes lower and upper bounds per node,
-clamps against seeded fences, then selects midpoints, pushing narrow gaps into warns.
+Ranks start at START (`1<<10`) with stride STEP (`1<<10`) so later inserts can bisect gaps without moving seeded nodes.
+A topological pass (Kahn) rejects cycles; a second pass computes lower and upper bounds per node.
 
 ### Type Inference
 
-z-idx returns an object that is both callable and map-like.Every key encountered during build is captured in the return type,
+z-idx returns an object that is both callable and map-like. Every key encountered during build is captured in the return type,
 allowing editors to suggest properties (`base.a`, `base.b`) and to hint previous keys during extension (`base((z)=>[z('b','x','c')])`).
-Edge preserve their embedded key set even when nested inside arrays, so deeply composed trees still surface full autocomplete.
+Edges preserve their embedded key set even when nested inside arrays, so deeply composed trees still surface full autocomplete.
 
 ### API Surface
 
@@ -95,31 +94,31 @@ Edge preserve their embedded key set even when nested inside arrays, so deeply c
 
 `ZFun` supports two shapes. Linear form: `z(lower, mid, upper, ...)` creates consecutive relations.
 Tree form: `z(parent, childrenArray)` where childrenArray may contain strings, nested arrays,
-or Edge; siblings share equal rank stride and retain declared order.
-Returned `ZApi` is callable for extension; it also exposes numeric ranks and a `warns` array.
+or Edge; siblings in an array share the same rank.
+Returned `ZApi` is callable for extension and exposes numeric ranks keyed by name.
 
 ## Pair Catalogue
 
 ### Pair Basics
 
 Deterministic stride across linear chains: `z('a','b','c','d')` yields ascending ranks with constant gap.
-Parent-array flattening: `z('a',['b','c','d'])` keeps `a` below each child and spaces siblings evenly.
+Parent-array flattening: `z('a',['b','c','d'])` keeps `a` below each child and places siblings at the same rank.
 Mixed declarations co-exist: a chain plus subtree (`z('a','b','c'), z('b',['d','e'])`) still keeps a uniform step.
-Deeply nested arrays collapse into one level above the parent while preserving sibling spacing.
+Deeply nested arrays collapse into one level above the parent while preserving sibling rank equality.
 Composite inference confirms all keys `{a,b,c,d,e}` appear numerically typed.
 
 ### Pair Recursion
 
 Edge can be reused as children.
-Building `z('a',[z('b','c','d'),'e'])` links `a` under the chain root and continues equal steps through `e->c->d`.
-Multiple tagged subtrees under one parent keep uniform spacing (`a` below `b<c<d<e`).
-Mixed top-level chains with sibling arrays maintain one stride while branching (`a<b<d<e<c<f<g`).
+Building `z('a',[z('b','c','d'),'e'])` links `a` below the chain `b<c<d` and also below the sibling `e`.
+Multiple tagged subtrees under one parent share the parent as lower bound and maintain their own internal ordering.
+Mixed top-level chains with sibling arrays maintain uniform stride while branching at each fork point.
 Inference spans linear, array, and tagged inputs ensuring the returned shape exposes every node.
 
 ### Pair Inference
 
-Nested tagged subtrees recurse without losing step: `z('a',[z('b',[z('c','d'),'e']), z('f',['g'])])` yields monotone ranks `a<b<f<c<e<g<d` with identical gaps.
-Deeply wrapped sibling arrays such as `z('a',[[['b','c']],['d','e'],'f'])` still spread ranks evenly.
+Nested tagged subtrees recurse without losing step: `z('a',[z('b',[z('c','d'),'e']), z('f',['g'])])` yields monotone ranks where `a` sits below both `b` and `f`, with `b` below `c<d` and `e`, while `f` sits below `g`.
+Deeply wrapped sibling arrays such as `z('a',[['b','c'],['d','e'],'f'])` flatten into ordered groups above `a` where sub-arrays introduce ordering between groups.
 Extensions that combine chain and tree forms leave seeds untouched while placing new nodes between them;
 new keys remain greater than their lower bounds and below preserved uppers.
 Further composition (`z('a',['b','c']), z('b',[z('d',['e',z('f','g')]),'h'])`) keeps all eight keys ordered and accessible on the returned API.
@@ -130,7 +129,7 @@ Further composition (`z('a',['b','c']), z('b',[z('d',['e',z('f','g')]),'h'])`) k
 
 All six non-isomorphic DAG shapes for three vertices are expressible.
 Straight chain `a<b<c` stays sorted.
-Single-parent sibling array `a<[b,c]` preserves declared child order when reversed.
+Single-parent sibling array `a<[b,c]` places both children at the same rank above the parent.
 Dual roots into one sink (`a->c, b->c`) converge cleanly.
 Fully dense triangle (`a->b, a->c, b->c`) respects transitivity.
 Nested pair arrays `z('a',[z('b','c')])` flatten to the same order.
@@ -253,7 +252,7 @@ The catalogue of four-vertex DAGs (31 shapes) maps onto builds combining chains,
 Examples include diamond `a->b, a->c, b->d, c->d`, balanced forks `a->[b,c,d]`,
 reversed sibling order `a->[d,c,b]`, cross-braced ladders `a->b, a->c, b->c, c->d`,
 parallel roots with tails, and dual roots merging before a sink.
-Uniform gaps persist regardless of edge density, demonstrating deterministic spacing across all enumerated isomorphism classes.
+Deterministic spacing holds across all enumerated isomorphism classes, with chains producing uniform stride and fan siblings sharing equal rank.
 
 #### 6 edges
 
@@ -1367,19 +1366,19 @@ Inserts can target both sides of a midpoint or only the right side; ordering rem
 
 ### Extension Packing
 
-Extensions also work outside the initial segment: placing nodes below the lowest seed or above the highest seed uses mirrored midpoint selection with the same stride size.
+Extensions also work outside the initial segment: placing nodes above the highest seed uses STEP-sized spacing, while placing nodes below the lowest seed uses dyadic interval subdivision.
 Dense clusters near a large gap center keep seeds stable.
-Mixing outer inserts with inner midpoints leaves fences intact while layering additional midpoints (`f`) between `a` and `c`.
-Packed sibling gaps across multiple regions (`left, mid, edge, right`) show that each local interval can be subdivided independently across successive overrides, with later splits smaller than half the prior stride.
+Mixing outer inserts with inner midpoints leaves fences intact while layering additional nodes between existing seeds.
+Packed sibling gaps across multiple regions show that each local interval can be subdivided independently across successive overrides, with later splits narrower than the prior interval.
 Cycles throw an exception immediately, ensuring the DAG assumption holds even in extension calls.
 
 ## Appendix
 
 ### Design Notes
 
-Implementation relies on Kahn topological sorting over all declared pairs plus seeded extras, followed by forward and backward constraint propagation to derive lower and upper fences.
-Midpoint assignment favors symmetric spacing; a constant STEP of 1024 defines initial gaps, then bitwise shifts (`>>1`) halve intervals during insertion cascades.
-Fence detection uses binary search to locate neighboring seeds and clamp candidates, keeping determinism across runs.
+Implementation relies on Kahn topological sorting over all declared pairs plus seeded extras, followed by forward and backward constraint propagation through parent-child edges to derive lower and upper fences.
+A constant STEP of 1024 defines initial gaps; the dyadic function (`1 << (31 - clz32(n))`) subdivides intervals during insertion cascades by selecting the largest power-of-two that fits within the available span.
+Fence propagation walks the DAG forward for lower bounds and backward for upper bounds, keeping determinism across runs.
 
 ### Contributing
 

@@ -2,16 +2,17 @@ import { describe, expect, it } from 'vitest'
 import { index } from './index'
 import { mid } from './utils'
 
-describe('extension density and gap shrinkage', () => {
+describe('extension density and gap mechanics', () => {
+
         describe('single midpoint insertion', () => {
-                it('inserts at midpoint of two seeds', () => {
+                it('inserts at exact midpoint value', () => {
                         const base = index((z) => z('a', 'b'))
                         const ext = base((z) => z('a', 'c', 'b')) // @ts-expect-error
                         ext._
                         expect(ext.c).toBe(mid(base.a + 1, base.b - 1))
                 })
 
-                it('midpoint is between the two seeds', () => {
+                it('midpoint strictly between seeds', () => {
                         const base = index((z) => z('a', 'b'))
                         const ext = base((z) => z('a', 'c', 'b')) // @ts-expect-error
                         ext._
@@ -21,7 +22,7 @@ describe('extension density and gap shrinkage', () => {
         })
 
         describe('successive left-side insertions', () => {
-                it('two left-side insertions halve gap twice', () => {
+                it('two left-side insertions produce expected midpoints', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'c', 'b'))
                         const e2 = e1((z) => z('a', 'd', 'c')) // @ts-expect-error
@@ -41,7 +42,7 @@ describe('extension density and gap shrinkage', () => {
         })
 
         describe('successive right-side insertions', () => {
-                it('right-side insertions approach upper bound', () => {
+                it('three right-side insertions are strictly ordered', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'c', 'b'))
                         const e2 = e1((z) => z('c', 'd', 'b'))
@@ -52,7 +53,7 @@ describe('extension density and gap shrinkage', () => {
                         expect(e3.e).toBeLessThan(base.b)
                 })
 
-                it('right-side insertion midpoint values', () => {
+                it('right-side midpoint equals expected value', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'c', 'b'))
                         const e2 = e1((z) => z('c', 'd', 'b')) // @ts-expect-error
@@ -61,8 +62,8 @@ describe('extension density and gap shrinkage', () => {
                 })
         })
 
-        describe('both-side insertions from midpoint', () => {
-                it('left and right of midpoint', () => {
+        describe('both-side insertions', () => {
+                it('left then right of midpoint maintains ordering', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'c', 'b'))
                         const e2 = e1((z) => z('a', 'd', 'c'))
@@ -75,7 +76,7 @@ describe('extension density and gap shrinkage', () => {
         })
 
         describe('earlier insertions remain stable', () => {
-                it('first insertion stable after second', () => {
+                it('first stable after second', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'c', 'b'))
                         const e2 = e1((z) => z('a', 'd', 'c')) // @ts-expect-error
@@ -83,7 +84,7 @@ describe('extension density and gap shrinkage', () => {
                         expect(e2.c).toBe(e1.c)
                 })
 
-                it('first and second insertions stable after third', () => {
+                it('first and second stable after third', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'c', 'b'))
                         const e2 = e1((z) => z('a', 'd', 'c'))
@@ -106,7 +107,7 @@ describe('extension density and gap shrinkage', () => {
                         expect(gap1b).toBeLessThan(gap0)
                 })
 
-                it('five successive insertions shrink gap monotonically', () => {
+                it('five successive insertions shrink monotonically', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'c', 'b'))
                         const e2 = e1((z) => z('a', 'd', 'c'))
@@ -132,25 +133,6 @@ describe('extension density and gap shrinkage', () => {
                 })
         })
 
-        describe('dense packing in one region', () => {
-                it('only insert between a,b leaves b,c gap unchanged', () => {
-                        const base = index((z) => z('a', 'b', 'c'))
-                        const gapBC = base.c - base.b
-                        const ext = base((z) => z('a', 'd', 'b')) // @ts-expect-error
-                        ext._
-                        expect(ext.c - ext.b).toBe(gapBC)
-                })
-
-                it('multiple insertions between a,b do not affect b,c', () => {
-                        const base = index((z) => z('a', 'b', 'c'))
-                        const gapBC = base.c - base.b
-                        const e1 = base((z) => z('a', 'd', 'b'))
-                        const e2 = e1((z) => z('a', 'e', 'd')) // @ts-expect-error
-                        e2._
-                        expect(e2.c - e2.b).toBe(gapBC)
-                })
-        })
-
         describe('multiple simultaneous insertions', () => {
                 it('three nodes inserted at once between a and b', () => {
                         const base = index((z) => z('a', 'b'))
@@ -160,6 +142,17 @@ describe('extension density and gap shrinkage', () => {
                         expect(ext.c).toBeLessThan(ext.d)
                         expect(ext.d).toBeLessThan(ext.e)
                         expect(ext.e).toBeLessThan(base.b)
+                })
+
+                it('four nodes inserted at once between a and b', () => {
+                        const base = index((z) => z('a', 'b'))
+                        const ext = base((z) => z('a', 'c', 'd', 'e', 'f', 'b')) // @ts-expect-error
+                        ext._
+                        expect(base.a).toBeLessThan(ext.c)
+                        expect(ext.c).toBeLessThan(ext.d)
+                        expect(ext.d).toBeLessThan(ext.e)
+                        expect(ext.e).toBeLessThan(ext.f)
+                        expect(ext.f).toBeLessThan(base.b)
                 })
 
                 it('simultaneous insertions in different gaps', () => {
@@ -173,18 +166,101 @@ describe('extension density and gap shrinkage', () => {
                 })
         })
 
-        describe('fencing behavior', () => {
-                it('first extension node acts as fence in second extension', () => {
+        describe('hi-direction multi-node extend', () => {
+                it('3-node hi: b < c < d with gap > 1', () => {
                         const base = index((z) => z('a', 'b'))
-                        const e1 = base((z) => z('a', 'c', 'b'))
-                        const e2 = e1((z) => z('a', 'd', 'c')) // @ts-expect-error
+                        const ext = base((z) => z('b', 'c', 'd')) // @ts-expect-error
+                        ext._
+                        expect(ext.b).toBeLessThan(ext.c)
+                        expect(ext.c).toBeLessThan(ext.d)
+                        expect(1).toBeLessThan(ext.d - ext.c)
+                })
+
+                it('3-node hi chained: x between c and d', () => {
+                        const base = index((z) => z('a', 'b'))
+                        const e1 = base((z) => z('b', 'c', 'd'))
+                        const e2 = e1((z) => z('c', 'x', 'd')) // @ts-expect-error
                         e2._
-                        expect(e2.d).toBe(mid(base.a + 1, e1.c - 1))
+                        expect(e1.c).toBeLessThan(e2.x)
+                        expect(e2.x).toBeLessThan(e1.d)
+                })
+
+                it('4-node hi: b < c < d < e with all gaps > 1', () => {
+                        const base = index((z) => z('a', 'b'))
+                        const ext = base((z) => z('b', 'c', 'd', 'e')) // @ts-expect-error
+                        ext._
+                        expect(ext.b).toBeLessThan(ext.c)
+                        expect(ext.c).toBeLessThan(ext.d)
+                        expect(ext.d).toBeLessThan(ext.e)
+                        expect(1).toBeLessThan(ext.c - ext.b)
+                        expect(1).toBeLessThan(ext.d - ext.c)
+                        expect(1).toBeLessThan(ext.e - ext.d)
+                })
+
+                it('chained 3-node hi: d < e < f with gap > 1', () => {
+                        const base = index((z) => z('a', 'b'))
+                        const e1 = base((z) => z('b', 'c', 'd'))
+                        const e2 = e1((z) => z('d', 'e', 'f')) // @ts-expect-error
+                        e2._
+                        expect(e1.d).toBeLessThan(e2.e)
+                        expect(e2.e).toBeLessThan(e2.f)
+                        expect(1).toBeLessThan(e2.f - e2.e)
+                })
+        })
+
+        describe('lo-direction multi-node extend', () => {
+                it('3-node lo: d < c < b with gap > 1', () => {
+                        const base = index((z) => z('b', 'a'))
+                        const ext = base((z) => z('d', 'c', 'b')) // @ts-expect-error
+                        ext._
+                        expect(ext.d).toBeLessThan(ext.c)
+                        expect(ext.c).toBeLessThan(ext.b)
+                        expect(1).toBeLessThan(ext.c - ext.d)
+                })
+
+                it('3-node lo chained: x between d and c', () => {
+                        const base = index((z) => z('b', 'a'))
+                        const e1 = base((z) => z('d', 'c', 'b'))
+                        const e2 = e1((z) => z('d', 'x', 'c')) // @ts-expect-error
+                        e2._
+                        expect(e1.d).toBeLessThan(e2.x)
+                        expect(e2.x).toBeLessThan(e1.c)
+                })
+
+                it('4-node lo: e < d < c < b with all gaps > 1', () => {
+                        const base = index((z) => z('b', 'a'))
+                        const ext = base((z) => z('e', 'd', 'c', 'b')) // @ts-expect-error
+                        ext._
+                        expect(ext.e).toBeLessThan(ext.d)
+                        expect(ext.d).toBeLessThan(ext.c)
+                        expect(ext.c).toBeLessThan(ext.b)
+                        expect(1).toBeLessThan(ext.d - ext.e)
+                        expect(1).toBeLessThan(ext.c - ext.d)
+                        expect(1).toBeLessThan(ext.b - ext.c)
+                })
+        })
+
+        describe('dense packing in one region', () => {
+                it('insert between a,b leaves b,c unchanged', () => {
+                        const base = index((z) => z('a', 'b', 'c'))
+                        const gapBC = base.c - base.b
+                        const ext = base((z) => z('a', 'd', 'b')) // @ts-expect-error
+                        ext._
+                        expect(ext.c - ext.b).toBe(gapBC)
+                })
+
+                it('multiple insertions do not affect other regions', () => {
+                        const base = index((z) => z('a', 'b', 'c'))
+                        const gapBC = base.c - base.b
+                        const e1 = base((z) => z('a', 'd', 'b'))
+                        const e2 = e1((z) => z('a', 'e', 'd')) // @ts-expect-error
+                        e2._
+                        expect(e2.c - e2.b).toBe(gapBC)
                 })
         })
 
         describe('deep insertion chain', () => {
-                it('eight successive insertions show consistent halving', () => {
+                it('eight successive left-side insertions shrink monotonically', () => {
                         const base = index((z) => z('a', 'b'))
                         const e1 = base((z) => z('a', 'n1', 'b'))
                         const e2 = e1((z) => z('a', 'n2', 'n1'))
@@ -194,7 +270,10 @@ describe('extension density and gap shrinkage', () => {
                         const e6 = e5((z) => z('a', 'n6', 'n5'))
                         const e7 = e6((z) => z('a', 'n7', 'n6'))
                         const e8 = e7((z) => z('a', 'n8', 'n7'))
-                        const gaps = [e1.n1 - base.a, e2.n2 - base.a, e3.n3 - base.a, e4.n4 - base.a, e5.n5 - base.a, e6.n6 - base.a, e7.n7 - base.a, e8.n8 - base.a]
+                        const gaps = [
+                                e1.n1 - base.a, e2.n2 - base.a, e3.n3 - base.a, e4.n4 - base.a,
+                                e5.n5 - base.a, e6.n6 - base.a, e7.n7 - base.a, e8.n8 - base.a,
+                        ]
                         for (let i = 1; i < gaps.length; i += 1) expect(gaps[i]).toBeLessThan(gaps[i - 1])
                 })
         })
@@ -222,6 +301,16 @@ describe('extension density and gap shrinkage', () => {
                         expect(e2.d).toBeLessThan(e1.c)
                         expect(e1.c).toBeLessThan(e3.e)
                         expect(e3.e).toBeLessThan(base.b)
+                })
+        })
+
+        describe('fencing behavior', () => {
+                it('first extension acts as fence in second', () => {
+                        const base = index((z) => z('a', 'b'))
+                        const e1 = base((z) => z('a', 'c', 'b'))
+                        const e2 = e1((z) => z('a', 'd', 'c')) // @ts-expect-error
+                        e2._
+                        expect(e2.d).toBe(mid(base.a + 1, e1.c - 1))
                 })
         })
 })
