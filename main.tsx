@@ -99,9 +99,9 @@ const menuTree = toTree(
                 </NavNode>
         </>
 )
-const Overlay = ({ show, z, close }: { show: boolean; z: number; close: () => void }) => <div className="absolute inset-0 bg-overlay glass" style={{ zIndex: z, display: show ? 'block' : 'none' }} onClick={close} />
-const PanelSlot = ({ show, z, left, children }: { show: boolean; z: number; left: string; children: React.ReactNode }) => (
-        <div className={`absolute p-x w top-68 ${left} grid gap-y bg-white-strong rounded-2x shadow-xl`} style={{ zIndex: z, display: show ? 'grid' : 'none' }}>
+const Overlay = ({ show, z, name, close }: { show: boolean; z: number; name: string; close: () => void }) => <div className="absolute inset-0 bg-overlay glass" data-z-idx-name={name} style={{ zIndex: z, display: show ? 'block' : 'none' }} onClick={close} />
+const PanelSlot = ({ show, z, name, left, children }: { show: boolean; z: number; name: string; left: string; children: React.ReactNode }) => (
+        <div className={`absolute p-x w top-68 ${left} grid gap-y bg-white-strong rounded-2x shadow-xl`} data-z-idx-name={name} style={{ zIndex: z, display: show ? 'grid' : 'none' }}>
                 {children}
         </div>
 )
@@ -158,16 +158,16 @@ const MenuPlayground = ({ next }: { next: Record<string, number> }) => {
                                                 {item.id === 'docs' ? docsLabel : item.label}
                                         </button>
                                 ))}
-                                <a href="https://github.com/tseijp/z-idx" className="ml-auto mr-x text-onyx font-bold tracking" style={{ zIndex: next['Github'] }} target="_blank" rel="noreferrer">
+                                <a href="https://github.com/tseijp/z-idx" className="ml-auto mr-x text-onyx font-bold tracking" data-z-idx-name="Github" style={{ zIndex: next['Github'] }} target="_blank" rel="noreferrer">
                                         GitHub
                                 </a>
                         </div>
-                        <Overlay show={!!path.length} z={next['primary overlay']} close={() => close(0)} />
-                        <PanelSlot show={!!path.length} z={next['primary modal']} left="left-x">
+                        <Overlay show={!!path.length} z={next['primary overlay']} name="primary overlay" close={() => close(0)} />
+                        <PanelSlot show={!!path.length} z={next['primary modal']} name="primary modal" left="left-x">
                                 <PanelList items={panelOne} drill={(item) => drill(0, item)} />
                         </PanelSlot>
-                        <Overlay show={path.length > 1} z={next['secondary overlay']} close={() => close(1)} />
-                        <PanelSlot show={path.length > 1} z={next['secondary modal']} left="left-2x">
+                        <Overlay show={path.length > 1} z={next['secondary overlay']} name="secondary overlay" close={() => close(1)} />
+                        <PanelSlot show={path.length > 1} z={next['secondary modal']} name="secondary modal" left="left-2x">
                                 <PanelList items={panelTwo} drill={(item) => drill(1, item)} />
                         </PanelSlot>
                 </div>
@@ -205,6 +205,44 @@ const Mermaid = ({ code, id }: { code: string; id: string }) => (
                 }
         />
 )
+const findZIndexElement = (el: HTMLElement | null): { el: HTMLElement; z: string; name?: string } | null => {
+        while (el) {
+                const z = getComputedStyle(el).zIndex
+                if (z !== 'auto' && !Number.isNaN(Number(z))) return { el, z, name: el.getAttribute('data-z-idx-name') || undefined }
+                el = el.parentElement
+        }
+        return null
+}
+const ZIndexBadge = () => {
+        React.useEffect(() => {
+                const badge = document.createElement('div')
+                const outline = document.createElement('div')
+                Object.assign(badge.style, { position: 'fixed', transform: 'translate(-50%, -50%)', background: '#000', color: '#fff', padding: '2px 4px', zIndex: '2147483647', display: 'none', fontSize: 'calc(1rem/1.618)' })
+                Object.assign(outline.style, { position: 'fixed', border: '1px solid #0B8CE9', pointerEvents: 'none', display: 'none', zIndex: '2147483646' })
+                document.body.appendChild(badge)
+                document.body.appendChild(outline)
+                const handleMove = (event: PointerEvent) => {
+                        const found = findZIndexElement(event.target as HTMLElement | null)
+                        if (!found) {
+                                badge.style.display = 'none'
+                                outline.style.display = 'none'
+                                return
+                        }
+                        const { el, z, name } = found
+                        const rect = el.getBoundingClientRect()
+                        badge.textContent = `${name || 'z'}: ${z}`
+                        Object.assign(badge.style, { left: `${rect.left}px`, top: `${rect.top}px`, display: 'block' })
+                        Object.assign(outline.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px`, display: 'block' })
+                }
+                document.addEventListener('pointermove', handleMove)
+                return () => {
+                        document.removeEventListener('pointermove', handleMove)
+                        badge.remove()
+                        outline.remove()
+                }
+        }, [])
+        return null
+}
 
 const md = markdownit({ html: true, linkify: true, typographer: true })
 md.renderer.rules.code_inline = (tokens, idx) => `<code class="code-block" data-lang="ts" data-code="${encodeURIComponent(tokens[idx].content)}" data-inline="1"></code>`
@@ -258,6 +296,7 @@ const App = () => {
                                 const { code = '', id } = el.dataset
                                 return createPortal(<Mermaid code={decodeURIComponent(code)} id={id || `mermaid-${i}`} />, el, id || `mermaid-${i}`)
                         })}
+                        <ZIndexBadge />
                 </>
         )
 }

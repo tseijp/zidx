@@ -21,20 +21,21 @@ export type ZFun = {
         <const T extends readonly Node[]>(...args: T): Edge<T>
 }
 export type ZExt<K extends string = string> = {
-        <const Req extends ZReq>(build: (z: ZFun) => Req): ZApi<K | Keys<Req>>
+        <const Req extends ZReq>(build: (z: ZFun) => Req, config?: Config): ZApi<K | Keys<Req>>
 }
-type Data = { key: string; children: Data[]; parents: Data[]; indeg: number; lo: number; hi: number; up: number; depth: number }
+export type Data = { key: string; children: Data[]; parents: Data[]; indeg: number; lo: number; hi: number; up: number; depth: number }
+export type Config = { seeds?: ZRes; inf?: number; step?: number; start?: number; mode?: 'dyadic' | 'floor'; divide?: (n: number) => number }
 const SYM = Symbol('z')
-const INF = 1 << 30
-const STEP = 1 << 10
-const START = STEP
 const { max, min } = Math
+const divisor = (mode: Config['mode']): Config['divide'] => {
+        if (mode === 'floor') return (n) => max(1, Math.floor(n))
+        return (n) => {
+                if (n <= 1) return 1
+                return 1 << (31 - Math.clz32(n))
+        }
+}
 function* backward<T>(arr: T[]) {
         for (let i = arr.length - 1; i >= 0; i--) yield arr[i]
-}
-const dyadic = (n: number): number => {
-        if (n <= 1) return 1
-        return 1 << (31 - Math.clz32(n))
 }
 const isEdge = (v: unknown): v is Edge => Array.isArray(v) && SYM in v
 const gather = (n: Node): { entries: string[]; edge: readonly Pair[] } => {
@@ -84,11 +85,11 @@ const collect = (v: unknown, out: Pair[]): void => {
         throw new Error('invalid pair: ${v}')
 }
 
-const graph = (edge: Pair[], seeds?: ZRes): Map<string, Data> => {
+const graph = (edge: Pair[], inf: number, seeds?: ZRes): Map<string, Data> => {
         const nodes = new Map<string, Data>()
         const get = (key: string): Data => {
                 let node = nodes.get(key) // parent predecessors(z=0) -> node(z=1) -> children successors(z=2)
-                if (!node) nodes.set(key, (node = { key, parents: [], children: [], indeg: 0, lo: -INF, hi: INF, up: 0, depth: 0 }))
+                if (!node) nodes.set(key, (node = { key, parents: [], children: [], indeg: 0, lo: -inf, hi: inf, up: 0, depth: 0 }))
                 return node
         }
         for (const [a, b] of edge) {
@@ -114,41 +115,42 @@ const depth = (queue: Data[]) => {
                 for (const child of node.children) child.depth = max(child.depth, next)
         }
 }
-const assign = (edge: Pair[], seeds?: ZRes): ZRes => {
-        const nodes = graph(edge, seeds)
+
+const assign = (edge: Pair[], { seeds, inf = 1073741824, mode, step = 1024, start = step, divide = divisor(mode)! }: Config = {}): ZRes => {
+        const nodes = graph(edge, inf, seeds)
         const queue = topo(nodes)
         depth(queue)
         const res: ZRes = seeds ? { ...seeds } : {}
         if (!seeds) {
-                for (const node of queue) res[node.key] = START + node.depth * STEP
+                for (const node of queue) res[node.key] = start + node.depth * step
                 return res
         }
         for (const node of queue) {
-                if (node.key in seeds) node.lo = node.hi = seeds[node.key]
+                if (node.key in res) node.lo = node.hi = res[node.key]
                 else for (const parent of node.parents) node.lo = max(node.lo, parent.lo)
         }
         for (const node of backward(queue)) {
-                if (node.key in seeds) continue
+                if (node.key in res) continue
                 for (const child of node.children) {
                         node.hi = min(node.hi, child.hi)
                         node.up = max(node.up, child.up + 1)
                 }
         }
         for (const node of queue) {
-                if (node.key in seeds) continue
-                const LO = node.lo !== -INF
-                const HI = node.hi !== INF
+                if (node.key in res) continue
+                const LO = node.lo !== -inf
+                const HI = node.hi !== inf
                 if (LO && HI) {
                         const span = node.depth + node.up
-                        const diff = dyadic((node.hi - node.lo) / span)
+                        const diff = divide((node.hi - node.lo) / span)
                         if (diff <= 0) throw new Error(`cannot insert node ${node.key}: no room between bounds (${node.lo} .. ${node.hi},)`)
                         res[node.key] = node.lo + diff * node.depth
                 } else if (HI) {
                         const span = node.depth + node.up + 1
-                        const diff = dyadic(node.hi / span)
+                        const diff = divide(node.hi / span)
                         res[node.key] = node.hi - diff * node.up
                 } else if (LO) {
-                        res[node.key] = node.lo + STEP * node.depth
+                        res[node.key] = node.lo + step * node.depth
                 } else throw new Error(`unreachable unbounded node: ${node.key}`)
         }
         return res
@@ -161,14 +163,17 @@ const z = (...args: Node[]): Edge => {
         edge[SYM] = true
         return edge
 }
-const api = (res?: ZRes): ZApi => {
-        const ret = (build: (z: ZFun) => unknown) => index(build, res)
+const api = (res?: ZRes, config?: Config): ZApi => {
+        const ret = (build: (z: ZFun) => unknown, _config?: Config) => {
+                _config = Object.assign({}, config, { seeds: res }, _config)
+                return index(build, _config)
+        }
         if (res) Object.assign(ret, res)
         return ret as ZApi
 }
-export function index<const Req extends ZReq>(build: (z: ZFun) => Req, seeds?: ZRes): ZApi<Keys<Req>> {
+export function index<const Req extends ZReq>(build: (z: ZFun) => Req, config?: Config): ZApi<Keys<Req>> {
         const edge: Pair[] = []
         collect(build(z), edge)
-        return api(assign(edge, seeds))
+        return api(assign(edge, config), config)
 }
 export default index
