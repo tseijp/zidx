@@ -56,7 +56,7 @@ npm i z-idx
 ### Example
 
 ```tsx
-const base = index((z) => z('primary overlay', ['primary modal', 'Github']))
+const base = index((z) => z('primary overlay', ['primary modal', 'Github']), { step: 1 })
 const next = base((z) => z('primary modal', 'secondary overlay', 'secondary modal'))
 
 if (base.Github !== next.Github) throw Error()

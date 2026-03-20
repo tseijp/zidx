@@ -4,7 +4,7 @@ import README from './README.md?raw' // @ts-ignore
 import README_JA from './README.ja.md?raw'
 import markdownit from 'markdown-it'
 import mermaid from 'mermaid'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { LiveEditor, LiveError, LivePreview, LiveProvider } from 'react-live'
@@ -27,6 +27,53 @@ const toTree = (input: React.ReactNode): NodeTree[] => {
                 items.push(node)
         }
         return items
+}
+
+const createBadge = () => {
+        const badge = document.createElement('div')
+        const outline = document.createElement('div')
+        const base = { position: 'fixed', pointerEvents: 'none' } as const
+        Object.assign(badge.style, base, { transform: 'translate(-50%, -50%)', background: '#0B8CE9', color: '#fff', padding: '0px 3px', borderRadius: '3px', fontSize: 'calc(1rem/1.618)', zIndex: '2147483647' })
+        Object.assign(outline.style, base, { border: '1px solid #0B8CE9', zIndex: '2147483646' })
+        badge.hidden = true
+        outline.hidden = true
+        let x = 0
+        let y = 0
+        let havePoint = false
+        const show = (el: HTMLElement, z: string, name?: string) => {
+                const r = el.getBoundingClientRect()
+                badge.textContent = `${name || 'z'}: ${z}`
+                badge.hidden = false
+                outline.hidden = false
+                Object.assign(badge.style, { left: `${r.left}px`, top: `${r.top}px` })
+                Object.assign(outline.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` })
+        }
+        const hide = () => {
+                badge.hidden = true
+                outline.hidden = true
+        }
+        const render = (el = document.elementFromPoint(x, y)) => {
+                if (!havePoint) return
+                const hit = findZIndexElement(el as HTMLElement)
+                if (!hit) return hide()
+                show(hit.el, hit.z, hit.name)
+        }
+        const move = (event: PointerEvent) => {
+                havePoint = true
+                x = event.clientX
+                y = event.clientY
+                render(event.target as HTMLElement)
+        }
+        const mount = () => {
+                document.body.append(badge, outline)
+                document.addEventListener('pointermove', move, true)
+                return () => {
+                        document.removeEventListener('pointermove', move, true)
+                        badge.remove()
+                        outline.remove()
+                }
+        }
+        return { hide, mount, render }
 }
 const runtime: { render?: (lang: 'en' | 'ja') => void; currentLang: 'en' | 'ja' } = { currentLang: 'en' }
 const NavNode = (_: NodeProps) => null
@@ -116,6 +163,7 @@ const PanelList = ({ items, drill }: { items: NodeTree[]; drill: (node: NodeTree
         </>
 )
 const MenuPlayground = ({ next }: { next: Record<string, number> }) => {
+        const [badge] = useState(createBadge)
         const [path, setPath] = React.useState<string[]>([])
         const [lang, setLang] = React.useState<'en' | 'ja'>(runtime.currentLang)
         const openRoot = (id: string) => setPath([id])
@@ -125,6 +173,7 @@ const MenuPlayground = ({ next }: { next: Record<string, number> }) => {
                 else if (node.id === 'lang-ja') setLang('ja')
                 if (node.action) node.action()
                 if (node.href) {
+                        badge.hide()
                         if (node.href.startsWith('#')) {
                                 const target = document.querySelector(node.href)
                                 if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -146,6 +195,8 @@ const MenuPlayground = ({ next }: { next: Record<string, number> }) => {
                 }
                 return current
         }
+        useEffect(() => badge.mount(), [])
+        useEffect(() => badge.render(), [path])
         const pickChildren = (nodes: NodeTree[], path: string[], depth: number) => resolveNode(nodes, path.slice(0, depth + 1))?.children || []
         const panelOne = path.length ? pickChildren(menuTree, path, 0) : []
         const panelTwo = path.length > 1 ? pickChildren(menuTree, path, 1) : []
@@ -213,37 +264,6 @@ const findZIndexElement = (el: HTMLElement | null): { el: HTMLElement; z: string
         }
         return null
 }
-const ZIndexBadge = () => {
-        React.useEffect(() => {
-                const badge = document.createElement('div')
-                const outline = document.createElement('div')
-                Object.assign(badge.style, { position: 'fixed', transform: 'translate(-50%, -50%)', background: '#000', color: '#fff', padding: '2px 4px', zIndex: '2147483647', display: 'none', fontSize: 'calc(1rem/1.618)' })
-                Object.assign(outline.style, { position: 'fixed', border: '1px solid #0B8CE9', pointerEvents: 'none', display: 'none', zIndex: '2147483646' })
-                document.body.appendChild(badge)
-                document.body.appendChild(outline)
-                const handleMove = (event: PointerEvent) => {
-                        const found = findZIndexElement(event.target as HTMLElement | null)
-                        if (!found) {
-                                badge.style.display = 'none'
-                                outline.style.display = 'none'
-                                return
-                        }
-                        const { el, z, name } = found
-                        const rect = el.getBoundingClientRect()
-                        badge.textContent = `${name || 'z'}: ${z}`
-                        Object.assign(badge.style, { left: `${rect.left}px`, top: `${rect.top}px`, display: 'block' })
-                        Object.assign(outline.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px`, display: 'block' })
-                }
-                document.addEventListener('pointermove', handleMove)
-                return () => {
-                        document.removeEventListener('pointermove', handleMove)
-                        badge.remove()
-                        outline.remove()
-                }
-        }, [])
-        return null
-}
-
 const md = markdownit({ html: true, linkify: true, typographer: true })
 md.renderer.rules.code_inline = (tokens, idx) => `<code class="code-block" data-lang="ts" data-code="${encodeURIComponent(tokens[idx].content)}" data-inline="1"></code>`
 md.renderer.rules.fence = (tokens, idx) => {
@@ -296,7 +316,6 @@ const App = () => {
                                 const { code = '', id } = el.dataset
                                 return createPortal(<Mermaid code={decodeURIComponent(code)} id={id || `mermaid-${i}`} />, el, id || `mermaid-${i}`)
                         })}
-                        <ZIndexBadge />
                 </>
         )
 }
