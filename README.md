@@ -1,4 +1,4 @@
-# z-idx
+# 💤 z-idx
 
 z-index DAG builder converting declarative stacking rules into stable numeric layers for shared UI libraries.
 
