@@ -32,7 +32,7 @@ const createBadge = () => {
         const badge = document.createElement('div')
         const outline = document.createElement('div')
         const base = { position: 'fixed', pointerEvents: 'none' } as const
-        Object.assign(badge.style, base, { transform: 'translate(-50%, -50%)', background: '#0B8CE9', color: '#fff', padding: '0px 3px', borderRadius: '3px', fontSize: 'calc(1rem/1.618)', zIndex: '2147483647' })
+        Object.assign(badge.style, base, { transform: 'translateX(-50%)', background: '#0B8CE9', color: '#fff', padding: '1px 6px', borderRadius: '3px', whiteSpace: 'nowrap', fontSize: '11px', lineHeight: '16px', zIndex: '2147483647' })
         Object.assign(outline.style, base, { border: '1px solid #0B8CE9', zIndex: '2147483646' })
         badge.hidden = true
         outline.hidden = true
@@ -44,7 +44,7 @@ const createBadge = () => {
                 badge.textContent = `${name || 'z'}: ${z}`
                 badge.hidden = false
                 outline.hidden = false
-                Object.assign(badge.style, { left: `${r.left}px`, top: `${r.top}px` })
+                Object.assign(badge.style, { left: `${r.left + r.width / 2}px`, top: `${r.top + r.height + 4}px` })
                 Object.assign(outline.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` })
         }
         const hide = () => {
