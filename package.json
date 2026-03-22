@@ -74,7 +74,6 @@
                 "@types/markdown-it": "^14.1.2",
                 "@types/react-dom": "^19.2.3",
                 "@vitest/coverage-v8": "*",
-                "install": "^0.13.0",
                 "markdown-it": "^14.1.1",
                 "mermaid": "^11.13.0",
                 "npm": "^11.11.1",
